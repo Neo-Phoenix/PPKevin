@@ -39,7 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # other Django apps
     'tailwind',
+    'theme',
 ]
+
+TAILWIND_APP_NAME = 'theme'
+
+NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -70,7 +75,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'UitleensysteemApp.wsgi.application'
-
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
