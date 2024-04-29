@@ -12,6 +12,11 @@ Dit is een klein Django project dat een beheer/uitleen systeem voor het medialab
 - Searchfunctie (bijvoorbeeld op ID, naam, enzovoort) voor gebruik in andere functies.
 - Overzicht van gegevens via console of grafische gebruikersinterface.
 
+## Optioneel:
+- Controleren van de voorraad van producten.
+- Verlengen van uitleenperiodes
+- Toepassen van boetes op laattijdig terugbrengen
+
 ## Installatie:
 1. Installeer de laatste versie van Python 3
 2. Installeer Django 5.0.4
