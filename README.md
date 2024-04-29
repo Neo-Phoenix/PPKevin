@@ -2,7 +2,7 @@
 Naam project: EhB Uitleensysteem
 
 ## Beschrijving:
-Dit is een klein Django project dat een beheer/uitleen systeem voor het medialab van EhB zal kunnen dienen.
+Dit is een klein Django webapplicatie project dat een beheer/uitleen systeem voor het medialab van EhB zal kunnen dienen.
 
 ## Kenmerken:
 - Beheer/Uitleen systeem voor het medialab van EhB.
