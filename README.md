@@ -1,8 +1,8 @@
 # PPKevin
-Naam project: EhB Uitleensysteem
+Naam project: EhB Uitleensysteem webapp.
 
 ## Beschrijving:
-Dit is een klein Django project dat een beheer/uitleen systeem voor het medialab van EhB zal kunnen dienen.
+Dit is een klein Django webapplicatie project dat een beheer/uitleen systeem voor het medialab van EhB zal kunnen dienen.
 
 ## Kenmerken:
 - Beheer/Uitleen systeem voor het medialab van EhB.
@@ -19,12 +19,14 @@ Dit is een klein Django project dat een beheer/uitleen systeem voor het medialab
 
 ## Installatie:
 1. Installeer de laatste versie van Python 3
-2. Installeer Django 5.0.4
+2. Installeer Django tailwind (css framework)
+pip install django-tailwind
+3. Installeer Django 5.0.4
    Linux / macOS:
       python -m pip install Django==5.0.4
 
    Windows:
       py -m pip install Django==5.0.4
 
-3. Clone de repository met git clone 
+4. Clone de repository met git clone 
       https://github.com/Neo-Phoenix/PPKevin
