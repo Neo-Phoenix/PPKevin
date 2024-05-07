@@ -3,7 +3,7 @@
 {% block title%} EhB ESA | Sign Up {% endblock %} 
 
 {% block body %}
-<form class="grid bg-white px-16 py-8 place-content-center rounded-2xl justify-self-center space-y-4" method="post" action="#">
+<form class="grid bg-white px-16 py-8 place-content-center rounded-2xl justify-self-center space-y-4" method="post" action="#">{% csrf_token %}
     <div class="bg-slate-900 rounded-md p-4 text-gray-300 text-center">Sign Up</div>
     <input class="bg-slate-600 rounded-md" placeholder="Username" id="username" name="username">
     <input class="bg-slate-600 rounded-md" placeholder="Password" id="password" name="password">
