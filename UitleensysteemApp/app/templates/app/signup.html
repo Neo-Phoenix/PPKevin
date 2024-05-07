@@ -2,10 +2,12 @@
 
 {% block title%} EhB ESA | Sign Up {% endblock %} 
 
-{% block body %} 
-<div class="bg-slate-900 rounded-md p-4 text-gray-300 text-center">Sign Up</div>
-<input class="bg-slate-600 rounded-md" placeholder="Username">
-<input class="bg-slate-600 rounded-md" placeholder="Password">
-<a href="signin"><h1 class="text-blue-600">Sign in? <u>Click here</u></h1></a>
-<input type="submit" class="bg-slate-600 rounded-md p-4 text-gray-300 text-center hover:bg-slate-800" value="Register"></input>
+{% block body %}
+<form class="grid bg-white px-16 py-8 place-content-center rounded-2xl justify-self-center space-y-4" method="post" action="#">
+    <div class="bg-slate-900 rounded-md p-4 text-gray-300 text-center">Sign Up</div>
+    <input class="bg-slate-600 rounded-md" placeholder="Username" id="username" name="username">
+    <input class="bg-slate-600 rounded-md" placeholder="Password" id="password" name="password">
+    <a href="signin"><h1 class="text-blue-600">Sign in? <u>Click here</u></h1></a>
+    <input type="submit" class="bg-slate-600 rounded-md p-4 text-gray-300 text-center hover:bg-slate-800" value="Register"></input>
+</form>
 {% endblock %} 
