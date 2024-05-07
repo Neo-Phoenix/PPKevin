@@ -1,0 +1,19 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} {% endblock %}</title>
+    {% tailwind_css %}
+</head>
+<body class="min-h-screen bg-gradient-to-b from-slate-950 to-blue-900">
+    <div class="min-h-screen grid grid-cols-1 place-content-center">
+        <form class="grid bg-white px-16 py-8 place-content-center rounded-2xl justify-self-center space-y-4">
+            {% block body %} 
+
+            {% endblock %}
+        </form>
+    </div>
+</body>
+</html>
