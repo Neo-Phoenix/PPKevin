@@ -1,9 +1,18 @@
-{% extends "base.html" %}
+{% extends "app/base.html" %}
 
 {% block title%} EhB ESA | Overview {% endblock %} 
 
 {% block body %}
-<div class="min-h-screen min-w-screen p-8 bg-slate-500 rounded-2xl">
-    <h1>test</h1>
-</div>
+    {% if request.user.is_authenticated %}
+        <div class="min-h-full min-w-full grid place-content-center text-white bg-slate-600 rounded-2xl">
+            <p>Succesvol ingelogd!</p>
+            <p>username: {{ request.user.username }}</p>
+            <p>PBKDF2 algorithm with a SHA256 hash password:</p>
+            <p>{{ request.user.password }}</p>
+        </div>
+
+    {% else %}
+        <h1>please log in</h1>
+    {% endif %} 
+
 {% endblock %} 
