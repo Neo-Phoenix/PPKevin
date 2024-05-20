@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'django_browser_reload'
 ]
 
+AUTH_USER_MODEL = 'User'
+
 TAILWIND_APP_NAME = 'theme'
 
 NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"

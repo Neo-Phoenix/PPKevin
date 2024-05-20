@@ -1,22 +1,29 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import PermissionsMixin
+
+
 
 # Create your models here.
 
-class User(models.Model):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
-    username = models.CharField(max_length=255)
-    hashedpassword = models.CharField(max_length=255)
+class User(AbstractBaseUser, PermissionsMixin):
+    identifier = models.CharField(max_length=40, unique=True)
 
-    @property
-    def full_name(self):
-        # Returns the person's full name.
-        return f"{self.first_name} {self.last_name}"
+    USERNAME_FIELD = "identifier"
+
+
+    # @property
+    # def full_name(self):
+    #     # Returns the person's full name.
+    #     return f"{self.first_name} {self.last_name}"
     
-    #python's dunder methode voor instance naam
-    def __str__(self):
-        return self.full_name
+    # #python's dunder methode voor instance naam
+    # def __str__(self):
+    #     return self.full_name
+
+class CustomUserAdmin(BaseUserAdmin):
+    ordering = ('email')
 
 class Calendar(models.Model):
     userid = models.ForeignKey(User, on_delete=models.CASCADE)
