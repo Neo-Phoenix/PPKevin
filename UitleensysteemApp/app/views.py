@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from app.models import *
 
 # Create your views here.
 
@@ -17,8 +18,16 @@ def signup(request):
 def overview(request):
     return render(request, 'app/overview.html')
 
-def event_controller(request):
-    return render(request, 'app/event-controller.html')
+def event_manager(request):
+    #check of user is ingelogd
+    if request.user.is_authenticated:
+        #alle objecten 
+        callendarEvents = CalendarEvent.objects.all()
+        #Geef data door aan controller view
+        return render(request, 'app/event-manager.html', {'calendarEvents': callendarEvents})
+    else:
+        return render(request, 'app/event-manager.html')
+
 
 def login(request):
     username = request.POST.get("username")
