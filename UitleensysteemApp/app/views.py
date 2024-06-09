@@ -17,6 +17,9 @@ def signup(request):
 def overview(request):
     return render(request, 'app/overview.html')
 
+def event_controller(request):
+    return render(request, 'app/event-controller.html')
+
 def login(request):
     username = request.POST.get("username")
     password = request.POST.get("password")
