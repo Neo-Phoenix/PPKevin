@@ -12,7 +12,7 @@
                 "runserver"
             ],
             "django": true,
-            "autoStartBrowser": false,
+            "autoStartBrowser": true,
             "program": "${workspaceFolder}\\UitleensysteemApp\\manage.py"
         }
     ]
