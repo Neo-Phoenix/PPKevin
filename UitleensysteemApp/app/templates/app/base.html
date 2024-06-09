@@ -8,12 +8,10 @@
     {% tailwind_css %}
 </head>
 <body class="min-h-screen bg-gradient-to-b from-slate-950 to-blue-900">
-    <div class="min-h-screen grid grid-cols-1 place-content-center">
-        <form class="grid bg-white px-16 py-8 place-content-center rounded-2xl justify-self-center space-y-4">
-            {% block body %} 
+    
+        {% block body %} 
 
-            {% endblock %}
-        </form>
+        {% endblock %}
     </div>
 </body>
 </html>
