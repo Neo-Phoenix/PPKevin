@@ -13,7 +13,7 @@
                 <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500 ">Event Manager</h2>
                 <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
                     {% if calendarEvents %}
-                        <ul class="grid">
+                        <ul class="grid gap-8">
                             {% for event in calendarEvents %}
                                 <li class="bg-slate-700 rounded-xl p-4">
                                     <form method="post" action="event-manager">
