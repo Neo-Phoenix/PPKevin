@@ -1,6 +1,6 @@
 {% extends "app/base.html" %}
 
-{% block title%} EhB ESA | Overview {% endblock %}
+{% block title%} EhB ESA | Event Manager {% endblock %}
 
 {% block body %}
     {% if request.user.is_authenticated %}
@@ -16,21 +16,43 @@
                         <ul class="grid">
                             {% for event in calendarEvents %}
                                 <li class="bg-slate-700 rounded-xl p-4">
-                                    <div class="bg-slate-800 rounded-2xl p-4 grid">
-                                        <h3 class="text-white">{{ event.eventid }}</h3>
-                                        <select class="text-slate-800" value='{{ eventtype.type }}'>
-                                        {% for eventtype in EventTypes %}
-                                            <option value='{{ eventtype.type }}'>{{ eventtype.type }}</option>
-                                        {% endfor %}
-                                        </select>
-                                        <input type="date" value="{{ event.eventid.start }}"></input>
-                                        <input type="date" value="{{ event.eventid.end }}"></input>
-                                        <input>Calendername: {{ event.calenderid }}</input>
-                                    </div>
-                                    <div class="flex place-content-end gap-4 py-4">
-                                        <input type="submit" class="bg-red-200 p-4 rounded-xl min-w-40 text-center" href="" value="Delete"></a>
-                                        <input type="submit" class="bg-green-200 p-4 rounded-xl min-w-40 text-center" href="" value="Update"></a>
-                                    </div>
+                                    <form method="post" action="event-manager">
+                                        <div class="bg-slate-800 rounded-2xl p-4 grid">
+                                            <h3 class="text-white">{{ event.eventid }}</h3>
+                                            <select class="text-slate-800" value='{{ eventtype.type }}'>
+                                            {% for eventtype in EventTypes %}
+                                                {% if event.eventid.eventType.type == eventtype.type %}
+                                                    <option value='{{ eventtype.type }}' selected>{{ eventtype.type }}</option>
+                                                {% else %}
+                                                    <option value='{{ eventtype.type }}'>{{ eventtype.type }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </select>
+                                            <!-- {% for eventtype in EventTypes %}
+                                                <p>{{ eventtype.type }}</p>
+                                                <p>{{ event.eventid.eventType.type }}</p>
+                                            {%endfor%} -->
+                                            <!-- {{ event.eventid.start }} -->
+
+                                            <!-- 
+                                            "| symbol is a pipe for Django Templates, It's used to apply filters to template variables."
+                                            "date" filter wordt gebruikt om date en time objects te filteren
+                                            ":" dubbele punt wordt gebruikt om basically argumenten aan filter date door te geven
+
+                                            "'Y-m-d': This is the format string argument passed to the date filter. It specifies how the date should be formatted.
+                                                Y: Represents the year in four digits (e.g., 2024).
+                                                m: Represents the month in two digits (e.g., 06 for June).
+                                                d: Represents the day in two digits (e.g., 09 for the 9th)."
+                                            
+                                            -->
+                                            <input type="date" value="{{ event.eventid.start|date:'Y-m-d' }}"></input>
+                                            <input type="date" value="{{ event.eventid.end|date:'Y-m-d' }}"></input>
+                                        </div>
+                                        <div class="flex place-content-end gap-4 py-4">
+                                            <input type="submit" class="bg-red-200 p-4 rounded-xl min-w-40 text-center" href="" value="Delete"></a>
+                                            <input type="submit" class="bg-green-200 p-4 rounded-xl min-w-40 text-center" href="" value="Update"></a>
+                                        </div>
+                                    </form>
                                 </li>
                             {% endfor %}
                         </ul>

@@ -10,6 +10,9 @@ from app.models import *
 
 
 def signin(request):
+    #check of user is ingelogd en redirect naar overview, geen nut om opnieuw in te loggen
+    if request.user.is_authenticated:
+        return render(request, 'app/overview.html')
     return render(request, 'app/signin.html')
 
 def signup(request):
@@ -21,12 +24,20 @@ def overview(request):
 def event_manager(request):
     #check of user is ingelogd
     if request.user.is_authenticated:
+        if request.method == "POST":
+            pass
+
+
+
+
+
+        
         #alle objecten van model van models.py
-        callendarEvents = CalendarEvent.objects.all()
+        calendarEvents = CalendarEvent.objects.all()
         eventTypes = EventType.objects.all()
 
         #Geef data door aan event manager view
-        return render(request, 'app/event-manager.html', {'calendarEvents': callendarEvents, 'EventTypes': eventTypes})
+        return render(request, 'app/event-manager.html', {'calendarEvents': calendarEvents, 'EventTypes': eventTypes})
     else:
         return render(request, 'app/event-manager.html')
 
