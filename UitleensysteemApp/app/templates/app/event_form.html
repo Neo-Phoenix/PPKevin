@@ -1,0 +1,13 @@
+{% extends "app/base.html" %}
+
+{% block title %}Event Form{% endblock %}
+
+{% block body %}
+    <h1>{{ form.instance.pk|yesno:"Edit,Create" }} Event</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'event_list' %}">Cancel</a>
+{% endblock %}

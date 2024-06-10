@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login as django_login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from app.models import *
+from app.forms import *
 
 # Create your views here.
 
@@ -19,17 +20,43 @@ def overview(request):
     return render(request, 'app/overview.html')
 
 def event_manager(request):
-    #check of user is ingelogd
-    if request.user.is_authenticated:
-        #alle objecten van model van models.py
-        callendarEvents = CalendarEvent.objects.all()
-        eventTypes = EventType.objects.all()
-
-        #Geef data door aan event manager view
-        return render(request, 'app/event-manager.html', {'calendarEvents': callendarEvents, 'EventTypes': eventTypes})
+    events = Event.objects.all()
+    if request.method == 'POST':
+        form = EventForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('event_manager')
     else:
-        return render(request, 'app/event-manager.html')
+        form = EventForm()
+    return render(request, 'app/event_manager.html', {'form': form, 'events': events})
 
+def event_update(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    if request.method == 'POST':
+        form = EventForm(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+            return redirect('event_manager')
+    else:
+        form = EventForm(instance=event)
+    return render(request, 'event_form.html', {'form': form})
+
+def event_delete(request, pk):
+    event = get_object_or_404(Event, pk=pk)
+    if request.method == 'POST':
+        event.delete()
+        return redirect('app/event_manager')
+    return render(request, 'event_confirm_delete.html', {'event': event})
+
+def event_create(request):
+    if request.method == 'POST':
+        form = EventForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('event_list')
+    else:
+        form = EventForm()
+    return render(request, 'event_manager/event_form.html', {'form': form})
 
 def login(request):
     username = request.POST.get("username")

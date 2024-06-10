@@ -1,0 +1,17 @@
+{% extends "app/base.html" %}
+
+{% block title %}Event Manager{% endblock %}
+
+{% block body %}
+    <h1>Events</h1>
+    <a href="{% url 'event_create' %}">Create new event</a>
+    <ul>
+        {% for event in events %}
+            <li>
+                {{ event }} 
+                <a href="{% url 'event_update' event.id %}">Edit</a>
+                <a href="{% url 'event_delete' event.id %}">Delete</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
