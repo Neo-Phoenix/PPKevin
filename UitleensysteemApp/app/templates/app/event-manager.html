@@ -16,16 +16,20 @@
                         <ul class="grid">
                             {% for event in calendarEvents %}
                                 <li class="bg-slate-700 rounded-xl p-4">
-                                    <div class="bg-slate-800 rounded-2xl p-4">
+                                    <div class="bg-slate-800 rounded-2xl p-4 grid">
                                         <h3 class="text-white">{{ event.eventid }}</h3>
-                                        <p class="text-white">Type: {{ event.eventid.eventType }}</p>
-                                        <p class="text-white">Start: {{ event.eventid.start }}</p>
-                                        <p class="text-white">Einde: {{ event.eventid.end }}</p>
-                                        <p class="text-white">Calendername: {{ event.calenderid }}</p>
+                                        <select class="text-slate-800" value='{{ eventtype.type }}'>
+                                        {% for eventtype in EventTypes %}
+                                            <option value='{{ eventtype.type }}'>{{ eventtype.type }}</option>
+                                        {% endfor %}
+                                        </select>
+                                        <input type="date" value="{{ event.eventid.start }}"></input>
+                                        <input type="date" value="{{ event.eventid.end }}"></input>
+                                        <input>Calendername: {{ event.calenderid }}</input>
                                     </div>
                                     <div class="flex place-content-end gap-4 py-4">
-                                        <a class="bg-red-200 p-4 rounded-xl min-w-40 text-center" href="">Delete</a>
-                                        <a class="bg-green-200 p-4 rounded-xl min-w-40 text-center" href="">Edit</a>
+                                        <input type="submit" class="bg-red-200 p-4 rounded-xl min-w-40 text-center" href="" value="Delete"></a>
+                                        <input type="submit" class="bg-green-200 p-4 rounded-xl min-w-40 text-center" href="" value="Update"></a>
                                     </div>
                                 </li>
                             {% endfor %}

@@ -21,10 +21,12 @@ def overview(request):
 def event_manager(request):
     #check of user is ingelogd
     if request.user.is_authenticated:
-        #alle objecten 
+        #alle objecten van model van models.py
         callendarEvents = CalendarEvent.objects.all()
-        #Geef data door aan controller view
-        return render(request, 'app/event-manager.html', {'calendarEvents': callendarEvents})
+        eventTypes = EventType.objects.all()
+
+        #Geef data door aan event manager view
+        return render(request, 'app/event-manager.html', {'calendarEvents': callendarEvents, 'EventTypes': eventTypes})
     else:
         return render(request, 'app/event-manager.html')
 
