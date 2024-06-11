@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login as django_login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -24,13 +24,43 @@ def overview(request):
 def event_manager(request):
     #check of user is ingelogd
     if request.user.is_authenticated:
+
+        # event CRUD handling
         if request.method == "POST":
-            pass
+            eventID = request.POST.get('event_id')
+            action = request.POST.get('action')
+            event = get_object_or_404(Event, id=eventID)
+            print(f"{event.id} en {eventID} en {action}")
 
 
+            if action == "Update":
+
+                #todo: check eerst of data niet leeg is en geldig is met database opties
+                eventType = request.POST.get('event_type')
+                startDate = request.POST.get('start_date')
+                endDate = request.POST.get('end_date')
+
+                #print(f"Event: {event}, Event ID: {eventID}, Action: {action}, EventType: {eventType}, Start Date: {startDate}, End Date: {endDate}")
+                
+                #check of endDate niet voor startDate komt
+                if startDate>=endDate:
+                    messages.warning(request, f"Dates are incorrect: {endDate} is before {startDate}") 
+                else:
+                    event.start = startDate
+                    event.end = endDate
+
+                    # Check eventtype object of object ook echt bestaat met de gegeven eventType
+                    event.eventType = get_object_or_404(EventType, type=eventType)
+                    
 
 
+                    event.save()
+                    messages.success(request, 'Event updated successfully.')
 
+            elif action == 'Delete':
+                # Delete the event
+                event.delete()
+                messages.success(request, 'Event deleted successfully.')
         
         #alle objecten van model van models.py
         calendarEvents = CalendarEvent.objects.all()

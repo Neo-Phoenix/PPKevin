@@ -11,17 +11,24 @@
             </div>
             <div class="grid gap-4 sm:gap-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr] sm:grid-rows-[1fr_19fr] grid-rows-[auto_1fr]">
                 <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500 ">Event Manager</h2>
-                <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
+                <div class="grid bg-slate-400 rounded-xl p-4 sm:p-8 gap-4">
+                    {% if messages %}
+                    <div class="bg-yellow-300 rounded-md p-4 text-slate-600 text-center">
+                        {% for message in messages %}
+                            <div class="toast {{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     {% if calendarEvents %}
-                        <ul class="grid gap-8">
-                            {% for event in calendarEvents %}
+                        <ul class="grid gap-4">
+                            {% for calenderEvent in calendarEvents %}
                                 <li class="bg-slate-700 rounded-xl p-4">
-                                    <form method="post" action="event-manager">
+                                    <form method="post" action="event-manager" id="{{ calenderEvent.id }}">{% csrf_token %}
                                         <div class="bg-slate-800 rounded-2xl p-4 grid">
-                                            <h3 class="text-white">{{ event.eventid }}</h3>
-                                            <select class="text-slate-800" value='{{ eventtype.type }}'>
+                                            <h3 class="text-white">{{ calenderEvent }}</h3>
+                                            <select class="text-slate-800" name="event_type" >
                                             {% for eventtype in EventTypes %}
-                                                {% if event.eventid.eventType.type == eventtype.type %}
+                                                {% if calenderEvent.eventid.eventType.type == eventtype.type %}
                                                     <option value='{{ eventtype.type }}' selected>{{ eventtype.type }}</option>
                                                 {% else %}
                                                     <option value='{{ eventtype.type }}'>{{ eventtype.type }}</option>
@@ -45,12 +52,15 @@
                                                 d: Represents the day in two digits (e.g., 09 for the 9th)."
                                             
                                             -->
-                                            <input type="date" value="{{ event.eventid.start|date:'Y-m-d' }}"></input>
-                                            <input type="date" value="{{ event.eventid.end|date:'Y-m-d' }}"></input>
+                                            <input type="date" name="start_date" value="{{ calenderEvent.eventid.start|date:'Y-m-d' }}"></input>
+                                            <input type="date" name="end_date" value="{{ calenderEvent.eventid.end|date:'Y-m-d' }}"></input>
+
                                         </div>
                                         <div class="flex place-content-end gap-4 py-4">
-                                            <input type="submit" class="bg-red-200 p-4 rounded-xl min-w-40 text-center" href="" value="Delete"></a>
-                                            <input type="submit" class="bg-green-200 p-4 rounded-xl min-w-40 text-center" href="" value="Update"></a>
+                                            {{ calenderEvent.id }}
+                                            <input type="hidden" name="event_id" value="{{ calenderEvent.id }}">
+                                            <button type="submit" name="action" class="bg-red-200 p-4 rounded-xl min-w-40 text-center" value="Delete" form="{{ calenderEvent.id }}">Delete</button>
+                                            <button type="submit" name="action" class="bg-green-200 p-4 rounded-xl min-w-40 text-center" value="Update"form="{{ calenderEvent.id }}">Update</button>
                                         </div>
                                     </form>
                                 </li>

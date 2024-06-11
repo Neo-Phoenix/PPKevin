@@ -7,20 +7,20 @@ class Calendar(models.Model):
     description = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.description
+        return f"{self.description}, Calendar ID: {self.id}"
 
 class EventType(models.Model):
     type = models.CharField(max_length=255, unique=True)
 
     #python's dunder methode voor instance naam, nodig in admin om het leesbaar te houden zoals "uitlenen" aan ipv "EventType object (1)"
     def __str__(self):
-        return self.type
+        return f"{self.type}, EventType ID: {self.id}"
 
 class ItemType(models.Model):
-    naam = models.CharField(max_length=255, unique=True)
+    type = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
-        return self.naam
+        return f"{self.type}, ItemType ID: {self.id}"
 
 class Item(models.Model):
     itemTypeID = models.ForeignKey(ItemType, on_delete=models.CASCADE)
@@ -28,7 +28,8 @@ class Item(models.Model):
     beschrijving = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.naam
+        return f"{self.naam}, Item ID: {self.id}"
+    
 class Event(models.Model):
     eventType = models.ForeignKey(EventType, on_delete=models.CASCADE)
     itemid = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -38,7 +39,7 @@ class Event(models.Model):
 
     def __str__(self):
         #f strings is handig voor string literals. eventType.type geeft onmiddelijk de naam die aan de FK zit
-        return f"Event: {self.eventType.type}, Item ID: {self.itemid.naam}, Start: {self.start}, End: {self.end}"
+        return f"Event: {self.eventType.type}, Item ID: {self.itemid.naam}, Start: {self.start}, End: {self.end}, Event ID: {self.id}"
 
 
 class CalendarEvent(models.Model):
@@ -46,4 +47,4 @@ class CalendarEvent(models.Model):
     eventid = models.ForeignKey(Event, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Calender Event: {self.eventid}"
+        return f"Calenderid: {self.calenderid} Event: {self.eventid}, CalendarEvent ID: {self.id}"
