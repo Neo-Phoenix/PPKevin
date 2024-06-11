@@ -1,14 +1,18 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login as django_login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from app.models import *
 
 # Create your views here.
 
 
 def signin(request):
+    #check of user is ingelogd en redirect naar overview, geen nut om opnieuw in te loggen
+    if request.user.is_authenticated:
+        return render(request, 'app/overview.html')
     return render(request, 'app/signin.html')
 
 def signup(request):
@@ -16,6 +20,56 @@ def signup(request):
 
 def overview(request):
     return render(request, 'app/overview.html')
+
+def event_manager(request):
+    #check of user is ingelogd
+    if request.user.is_authenticated:
+
+        # event CRUD handling
+        if request.method == "POST":
+            eventID = request.POST.get('event_id')
+            action = request.POST.get('action')
+            event = get_object_or_404(Event, id=eventID)
+            print(f"{event.id} en {eventID} en {action}")
+
+
+            if action == "Update":
+                #todo: check eerst of data niet leeg is en geldig is met database opties
+                eventType = request.POST.get('event_type')
+                item_naam = request.POST.get('item_naam')
+                startDate = request.POST.get('start_date')
+                endDate = request.POST.get('end_date')
+
+                #print(f"Event: {event}, Event ID: {eventID}, Action: {action}, EventType: {eventType}, Start Date: {startDate}, End Date: {endDate}")
+                
+                #check of endDate niet voor startDate komt
+                if startDate>=endDate:
+                    messages.warning(request, f"Dates are incorrect: {endDate} is before {startDate}") 
+                else:
+                    event.start = startDate
+                    event.end = endDate
+                    event.itemid = get_object_or_404(Item, naam=item_naam)
+                    # Check eventtype object of object ook echt bestaat met de gegeven eventType
+                    event.eventType = get_object_or_404(EventType, type=eventType)
+                    
+                    event.save()
+                    messages.success(request, 'Event updated successfully.')
+
+            elif action == 'Delete':
+                # Delete the event
+                event.delete()
+                messages.success(request, 'Event deleted successfully.')
+        
+        #alle objecten van model van models.py
+        Items = Item.objects.all()
+        CalendarEvents = CalendarEvent.objects.all()
+        EventTypes = EventType.objects.all()
+
+        #Geef data door aan event manager view
+        return render(request, 'app/event-manager.html', {'calendarEvents': CalendarEvents, 'EventTypes': EventTypes, 'Items': Items})
+    else:
+        return render(request, 'app/event-manager.html')
+
 
 def login(request):
     username = request.POST.get("username")
