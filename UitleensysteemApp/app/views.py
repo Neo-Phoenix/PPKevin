@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from app.models import *
+from datetime import datetime
+import calendar
 
 # Create your views here.
 
@@ -19,7 +21,54 @@ def signup(request):
     return render(request, 'app/signup.html')
 
 def overview(request):
-    return render(request, 'app/overview.html')
+    allCalendarEvents = CalendarEvent.objects.all()
+    currentDateTime = datetime.now()
+    currentYear = currentDateTime.year
+    currentMonth = currentDateTime.month
+
+    # Month in text 
+    currentMonthInText = currentDateTime.strftime("%B")
+    currentYearInText = currentDateTime.strftime("%Y")
+
+    currentDate = currentDateTime.date()
+
+    #voor de maan july returned 'daysInCurrentMonth = calendar.monthrange(currentYear, currentMonth)' dit: (5, 30) 
+    #30 is het aantal dagen voor de huidige maand nodig voor de kalender generatie daarom de [1] positie van de array aka tuple
+    daysInCurrentMonth = calendar.monthrange(currentYear, currentMonth)[1]
+    listDaysInCurrentMonth = list(range(1, daysInCurrentMonth+1))
+    #print(f"{daysInCurrentMonth}")
+    #check events van calendarEvent voor de huidige maand:
+    calenderEventDictionary = {}
+    for calendarEvent in allCalendarEvents:
+
+        #strptime vraag string aan geen object daarom str() dan .month om enkel de converted maand over te houden
+        startDateTimeObjectOfCalendarEvent = datetime.strptime(str(calendarEvent.eventid.start), "%Y-%m-%d")
+        endDateTimeObjectOfCalendarEvent = datetime.strptime(str(calendarEvent.eventid.end), "%Y-%m-%d")
+
+        calenderEventStartMonth = startDateTimeObjectOfCalendarEvent.month
+        startDay = int(startDateTimeObjectOfCalendarEvent.day)
+        endDay = int(endDateTimeObjectOfCalendarEvent.day)
+
+        #print(f"{calenderEventStartMonthString} and {currentMonth}")
+
+        if calenderEventStartMonth == currentMonth:
+            #check of enddate ook in maand zit anders einde dag van de maand
+            if endDateTimeObjectOfCalendarEvent.month != currentMonth:
+                listDaysTillEndOfMonth = list(range(startDay, daysInCurrentMonth+1))
+                calenderEventDictionary[calendarEvent] = listDaysTillEndOfMonth
+            # Generate and return the list of days
+            else:
+                listDaysTillEndDate = list(range(startDay, endDay + 1))
+                calenderEventDictionary[calendarEvent] = listDaysTillEndDate
+    
+    print(calenderEventDictionary)
+    print(listDaysInCurrentMonth)
+    return render(request, 'app/overview.html', {
+        "calenderEventDictionary": calenderEventDictionary, 
+        "listDaysInCurrentMonth": listDaysInCurrentMonth, 
+        "currentMonthInText":currentMonthInText,
+        "currentYearInText": currentYearInText
+        })
 
 def event_manager(request):
     #check of user is ingelogd
