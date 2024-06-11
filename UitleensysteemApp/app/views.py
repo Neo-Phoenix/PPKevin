@@ -34,9 +34,9 @@ def event_manager(request):
 
 
             if action == "Update":
-
                 #todo: check eerst of data niet leeg is en geldig is met database opties
                 eventType = request.POST.get('event_type')
+                item_naam = request.POST.get('item_naam')
                 startDate = request.POST.get('start_date')
                 endDate = request.POST.get('end_date')
 
@@ -48,12 +48,10 @@ def event_manager(request):
                 else:
                     event.start = startDate
                     event.end = endDate
-
+                    event.itemid = get_object_or_404(Item, naam=item_naam)
                     # Check eventtype object of object ook echt bestaat met de gegeven eventType
                     event.eventType = get_object_or_404(EventType, type=eventType)
                     
-
-
                     event.save()
                     messages.success(request, 'Event updated successfully.')
 
@@ -63,11 +61,12 @@ def event_manager(request):
                 messages.success(request, 'Event deleted successfully.')
         
         #alle objecten van model van models.py
-        calendarEvents = CalendarEvent.objects.all()
-        eventTypes = EventType.objects.all()
+        Items = Item.objects.all()
+        CalendarEvents = CalendarEvent.objects.all()
+        EventTypes = EventType.objects.all()
 
         #Geef data door aan event manager view
-        return render(request, 'app/event-manager.html', {'calendarEvents': calendarEvents, 'EventTypes': eventTypes})
+        return render(request, 'app/event-manager.html', {'calendarEvents': CalendarEvents, 'EventTypes': EventTypes, 'Items': Items})
     else:
         return render(request, 'app/event-manager.html')
 

@@ -24,7 +24,7 @@
                             {% for calenderEvent in calendarEvents %}
                                 <li class="bg-slate-700 rounded-xl p-4">
                                     <form method="post" action="event-manager" id="{{ calenderEvent.id }}">{% csrf_token %}
-                                        <div class="bg-slate-800 rounded-2xl p-4 grid">
+                                        <div class="grid bg-slate-800 rounded-2xl p-4 gap-2">
                                             <h3 class="text-white">{{ calenderEvent }}</h3>
                                             <select class="text-slate-800" name="event_type" >
                                             {% for eventtype in EventTypes %}
@@ -34,6 +34,21 @@
                                                     <option value='{{ eventtype.type }}'>{{ eventtype.type }}</option>
                                                 {% endif %}
                                             {% endfor %}
+                                            </select>
+
+                                            <!-- 
+                                            {{calenderEvent.eventid.itemid.naam}}
+                                            {% for item in Items %}
+                                                {{item}}
+                                            {% endfor %} -->
+                                            <select class="text-slate-800" name="item_naam" >
+                                                {% for item in Items %}
+                                                    {% if calenderEvent.eventid.itemid.naam == item.naam %}
+                                                        <option value='{{ item.naam }}' selected>{{ item.naam }}</option>
+                                                    {% else %}
+                                                        <option value='{{ item.naam }}'>{{ item.naam }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
                                             </select>
                                             <!-- {% for eventtype in EventTypes %}
                                                 <p>{{ eventtype.type }}</p>
@@ -57,7 +72,6 @@
 
                                         </div>
                                         <div class="flex place-content-end gap-4 py-4">
-                                            {{ calenderEvent.id }}
                                             <input type="hidden" name="event_id" value="{{ calenderEvent.id }}">
                                             <button type="submit" name="action" class="bg-red-200 p-4 rounded-xl min-w-40 text-center" value="Delete" form="{{ calenderEvent.id }}">Delete</button>
                                             <button type="submit" name="action" class="bg-green-200 p-4 rounded-xl min-w-40 text-center" value="Update"form="{{ calenderEvent.id }}">Update</button>
