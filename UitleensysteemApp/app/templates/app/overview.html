@@ -9,10 +9,10 @@
                 <h1 class="font-bold text-2xl text-slate-600">Overview</h1>
                 <a class="bg-slate-600 px-4 py-2 sm:py-4 rounded-2xl text-center text-slate-400 font-medium" href="logout_view">logout</a>
             </div>
-            <div class="grid gap-4 sm:gap-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr] sm:grid-rows-[1fr_19fr] grid-rows-[auto_1fr]">
-                <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500 ">Welcome</h1>
-                <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
-                    <h2>
+            <div class="grid gap-4 sm:gap-x-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr]  grid-rows-[auto_1fr]">
+                <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">Welcome</h1>
+                <div class="grid bg-slate-400 rounded-xl gap-2 sm:px-8 sm:pb-8 p-4 ">
+                    <h2 class="text-lg text-slate-100 font-medium">
                         {% if chosen_month_to_text %}
                             All events for: {{chosen_month_to_text}}, 
                         {% endif %}
@@ -30,15 +30,17 @@
 
                                     <!-- "for event, days"
                                      Event zal de key bevatten en days zal de data bevatten die met die key geassocieerd is -->
-                                    {% for event, days in calendar_event_dictionary.items %}
+                                    {% for event, days_and_color in calendar_event_dictionary.items %}
                                     <!-- "calendar_event_dictionary.items"
                                     Om over Key-Value Pairs te itereren moet de dictionary calendar_event_dictionary omgezet worden met .items() (in Django is dit gewoon .items)
                                     om zowel de key als de values van de keys te gebruiken in de for loop met "event, days".
+
+                                    De key is namelijk een CalendarEvent object waar ik mee werk.
                                     
                                     Dit zal de dictionary omzetten van:
-                                    {<eventObject instance1>: {21, 22, 23, ..., 30}, <eventObject instance2>: {10, 11, 12, ..., 26}}
-                                    naar:
-                                    [(<eventObject instance>, {21, 22, 23, ..., 30}), (<eventObject instance2>, {10, 11, 12, ..., 26})]
+                                    {<eventObject instance1>: {...}, <eventObject instance2>: {...}}
+                                    naar een list met key-value pair tuples:
+                                    [(<eventObject instance1>: {...}, <eventObject instance2>: {...}), (<eventObject instance1>: {...}, <eventObject instance2>: {...})]
 
                                     De default iteratie van Python met de for loop iterate enkel over de keys van de dictionary en niet de values.
                                     Dus door .items() te gebruiken kun je over zowel de keys als de values itereren.
@@ -53,8 +55,10 @@
                                     wanneer days een lijst is, voert een lineaire zoekopdracht uit met O(n) complexiteit. 
                                     Ter vergelijking, het gebruik van een set zou O(1) gemiddelde tijdcomplexiteit voor "Membership Check" mogelijk maken.
                                     -->
-                                    {% if i in days %}
-                                        <div class="bg-slate-300 p-2">
+                                    <!-- i in days_and_color.event_days_as_set dit zal de inner dictionary met key "event_days_as_set" aanspreken -->
+                                    {% if i in days_and_color.event_days_as_set %}
+
+                                        <div class="p-2 rounded-md text-white" style="background-color: rgb({{days_and_color.rgb.r}}, {{days_and_color.rgb.g}}, {{days_and_color.rgb.b}});">
                                             {{ event.eventid.eventType.type }}<br>
                                             {{ event.eventid.itemid.naam }}<br>
                                             {{ event.calenderid.userid.username }}<br>
@@ -68,8 +72,8 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
-                    <a href="event-manager">Manage Events</a>
+                <div class="grid bg-slate-400 rounded-xl p-4 sm:p-8 font-medium">
+                    <a class="" href="event-manager">Manage Events</a>
                 </div>
             </div>
         </div>
