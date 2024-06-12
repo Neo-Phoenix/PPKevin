@@ -65,12 +65,12 @@ def overview(request):
         else:
             event_days_as_set = {}
 
-        rgb = hash_to_rgb(calendar_event, "dark", 47, 98, 12)
+        rgb = hash_to_rgb(calendar_event, "dark", 75, 28, 82)
         #calender_event is de key dat als object wordt meegegeven
         calendar_event_dictionary[calendar_event] = {'event_days_as_set': event_days_as_set, 'rgb': rgb}
 
     
-    #print(calendar_event_dictionary)
+    print(calendar_event_dictionary)
     #print(days_in_chosen_month_as_set)
     return render(request, 'app/overview.html', {
         "calendar_event_dictionary": calendar_event_dictionary, 
@@ -87,39 +87,62 @@ def event_manager(request):
         if request.method == "POST":
             event_id = request.POST.get('event_id')
             action = request.POST.get('action')
-            event = get_object_or_404(Event, id=event_id)
-            print(f"{event.id} en {event_id} en {action}")
+            
+            #todo: check eerst of data niet leeg is en geldig is met database opties
+            event_type = request.POST.get('event_type')
+            item_naam = request.POST.get('item_naam')
+            user_username = request.POST.get('user_username')
+            start_date = request.POST.get('start_date')
+            end_date = request.POST.get('end_date')
+        
+            userid = get_object_or_404(User, username=user_username)
 
-
-            if action == "Update":
-                #todo: check eerst of data niet leeg is en geldig is met database opties
-                event_type = request.POST.get('event_type')
-                item_naam = request.POST.get('item_naam')
-                start_date = request.POST.get('start_date')
-                end_date = request.POST.get('end_date')
-
-                #print(f"Event: {event}, Event ID: {event_id}, Action: {action}, event_type: {event_type}, Start Date: {start_date}, End Date: {end_date}")
+            #print(f"{event.id} en {event_id} en {action}")
+            #check of end_date niet voor start_date komt
+            if start_date>=end_date:
+                messages.warning(request, f"Dates are incorrect: {end_date} is before {start_date}") 
                 
-                #check of end_date niet voor start_date komt
-                if start_date>=end_date:
-                    messages.warning(request, f"Dates are incorrect: {end_date} is before {start_date}") 
-                else:
-                    event.start = start_date
-                    event.end = end_date
-                    event.itemid = get_object_or_404(Item, naam=item_naam)
-                    # Check eventtype object of object ook echt bestaat met de gegeven event_type
-                    event.event_type = get_object_or_404(EventType, type=event_type)
-                    
-                    event.save()
-                    messages.success(request, 'Event updated successfully.')
+            elif action == "Update":
+                event = get_object_or_404(Event, id=event_id)
+                calendar_event = get_object_or_404(CalendarEvent, eventid=event_id)
+                #print(f"Event: {event}, Event ID: {event_id}, Action: {action}, event_type: {event_type}, Start Date: {start_date}, End Date: {end_date}")                
+                event.start = start_date
+                event.end = end_date
+                event.itemid = get_object_or_404(Item, naam=item_naam)
+                # Check eventtype object of object ook echt bestaat met de gegeven event_type
+                event.eventType = get_object_or_404(EventType, type=event_type)    
+                event.save()
+
+                
+                calendar_event.calendarid = get_object_or_404(Calendar, userid=userid)
+                calendar_event.save()
+
+                messages.success(request, 'Event updated successfully.')
 
             elif action == 'Delete':
                 # Delete the event
                 event.delete()
                 messages.success(request, 'Event deleted successfully.')
+
+            elif action == 'Create':
+                eventType = get_object_or_404(EventType, type=event_type)
+                itemid = get_object_or_404(Item, naam=item_naam)
+                new_event = Event(eventType=eventType, itemid=itemid, start=start_date, end=end_date)
+                #print(new_event)
+
+                new_event.save()
+                calendarid = get_object_or_404(Calendar, userid=userid)
+                new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
+                new_calender_event.save()
+                # calendarid = get_object_or_404(Calendar, userid=userid)
+                # new_calender_event = CalendarEvent(calendarid=calendarid, eventid=event )
+
+                # print(new_calender_event)
+
         
         #alle objecten van model van models.py
         items = Item.objects.all()
+        users = User.objects.all()
         calendar_events = CalendarEvent.objects.all()
         event_types = EventType.objects.all()
 
@@ -127,7 +150,9 @@ def event_manager(request):
         return render(request, 'app/event-manager.html', {
             'calendar_events': calendar_events,
             'event_types': event_types,
-            'items': items})
+            'items': items,
+            'users': users
+            })
     else:
         return render(request, 'app/event-manager.html')
 
@@ -167,6 +192,9 @@ def register(request):
     #Check paswoord ook hetzelfde is
     if password == password_check:
         User.objects.create_user(username=email, email=email, password=password, first_name=firstname, last_name=lastname)
+        user = get_object_or_404(User, username=email)
+        calendar = Calendar(userid=user, description=user.username)
+        calendar.save()
         messages.warning(request, "Succesfully registered, please login.")
         return render(request, 'app/signin.html', {'firstname': firstname, 'lastname': lastname, 'email': email})
     else:

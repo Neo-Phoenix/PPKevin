@@ -2,7 +2,7 @@ from django.contrib import admin
 from app.models import *
 
 # Register your models here.
-# usr: kevin
+# usr: Admin
 # psw: 12345678!
 
 admin.site.register(EventType)

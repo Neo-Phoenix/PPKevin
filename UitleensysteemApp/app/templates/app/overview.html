@@ -12,7 +12,7 @@
             <div class="grid gap-4 sm:gap-x-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr]  grid-rows-[auto_1fr]">
                 <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">Welcome</h1>
                 <div class="grid bg-slate-400 rounded-xl gap-2 sm:px-8 sm:pb-8 p-4 ">
-                    <h2 class="text-lg text-slate-100 font-medium">
+                    <h2 class="text-xl text-slate-100 font-medium">
                         {% if chosen_month_to_text %}
                             All events for: {{chosen_month_to_text}}, 
                         {% endif %}
@@ -25,46 +25,49 @@
                         {% if calendar_event_dictionary %}
                         <div id="week" class="grid grid-cols-7 gap-2">
                             {% for i in days_in_chosen_month_as_set %}
-                                <div class="grid bg-slate-200 rounded-md gap-2 p-2">
-                                    {{i}}
+                                <div class=" bg-slate-200 rounded-md p-2">
+                                    <div class="flex h-full flex-col">
+                                    <p class="pb-2">{{i}}</p>
+                                        <div class="flex flex-col-reverse gap-2 h-full">
+                                            <!-- "for event, days"
+                                            Event zal de key bevatten en days zal de data bevatten die met die key geassocieerd is -->
+                                            {% for event, days_and_color in calendar_event_dictionary.items %}
+                                            <!-- "calendar_event_dictionary.items"
+                                            Om over Key-Value Pairs te itereren moet de dictionary calendar_event_dictionary omgezet worden met .items() (in Django is dit gewoon .items)
+                                            om zowel de key als de values van de keys te gebruiken in de for loop met "event, days".
 
-                                    <!-- "for event, days"
-                                     Event zal de key bevatten en days zal de data bevatten die met die key geassocieerd is -->
-                                    {% for event, days_and_color in calendar_event_dictionary.items %}
-                                    <!-- "calendar_event_dictionary.items"
-                                    Om over Key-Value Pairs te itereren moet de dictionary calendar_event_dictionary omgezet worden met .items() (in Django is dit gewoon .items)
-                                    om zowel de key als de values van de keys te gebruiken in de for loop met "event, days".
+                                            De key is namelijk een CalendarEvent object waar ik mee werk.
+                                            
+                                            Dit zal de dictionary omzetten van:
+                                            {<eventObject instance1>: {...}, <eventObject instance2>: {...}}
+                                            naar een list met key-value pair tuples:
+                                            [(<eventObject instance1>: {...}, <eventObject instance2>: {...}), (<eventObject instance1>: {...}, <eventObject instance2>: {...})]
 
-                                    De key is namelijk een CalendarEvent object waar ik mee werk.
-                                    
-                                    Dit zal de dictionary omzetten van:
-                                    {<eventObject instance1>: {...}, <eventObject instance2>: {...}}
-                                    naar een list met key-value pair tuples:
-                                    [(<eventObject instance1>: {...}, <eventObject instance2>: {...}), (<eventObject instance1>: {...}, <eventObject instance2>: {...})]
+                                            De default iteratie van Python met de for loop iterate enkel over de keys van de dictionary en niet de values.
+                                            Dus door .items() te gebruiken kun je over zowel de keys als de values itereren.
+                                            Nodig voor event.eventid.eventType.type tijdens de value check in days.
 
-                                    De default iteratie van Python met de for loop iterate enkel over de keys van de dictionary en niet de values.
-                                    Dus door .items() te gebruiken kun je over zowel de keys als de values itereren.
-                                    Nodig voor event.eventid.eventType.type tijdens de value check in days.
+                                            De complexiteit van het controleren op "Membership Check" (if i in days) in een lijst is O(n), waarbij n de lengte van de lijst is. 
+                                            dus heb ik days las is een set gedifined in plaats van een lijst, en wordt de complexiteit O(1).
 
-                                    De complexiteit van het controleren op "Membership Check" (if i in days) in een lijst is O(n), waarbij n de lengte van de lijst is. 
-                                    dus heb ik days las is een set gedifined in plaats van een lijst, en wordt de complexiteit O(1).
+                                            Het gebruik van .items() zelf verandert de iteratiecomplexiteit niet, die blijft O(n) als days een list was, waarbij n het aantal items in de dictionary is.
 
-                                    Het gebruik van .items() zelf verandert de iteratiecomplexiteit niet, die blijft O(n) als days een list was, waarbij n het aantal items in de dictionary is.
+                                            De zoekimplementatie met een lidmaatschapscontrole "if i in days" in Python:
+                                            wanneer days een lijst is, voert een lineaire zoekopdracht uit met O(n) complexiteit. 
+                                            Ter vergelijking, het gebruik van een set zou O(1) gemiddelde tijdcomplexiteit voor "Membership Check" mogelijk maken.
+                                            -->
+                                            <!-- i in days_and_color.event_days_as_set dit zal de inner dictionary met key "event_days_as_set" aanspreken -->
+                                            {% if i in days_and_color.event_days_as_set %}
+                                                <div class="p-2 rounded-md text-white h-full break-words" style="background-color: rgb({{days_and_color.rgb.r}}, {{days_and_color.rgb.g}}, {{days_and_color.rgb.b}});">
+                                                    <p>{{ event.eventid.eventType.type }}</p>
+                                                    <p>{{ event.eventid.itemid.naam }}</p>
+                                                    <p>{{ event.calendarid.userid.username }}</p>
+                                                </div>
+                                            {% endif %}
 
-                                    De zoekimplementatie met een lidmaatschapscontrole "if i in days" in Python:
-                                    wanneer days een lijst is, voert een lineaire zoekopdracht uit met O(n) complexiteit. 
-                                    Ter vergelijking, het gebruik van een set zou O(1) gemiddelde tijdcomplexiteit voor "Membership Check" mogelijk maken.
-                                    -->
-                                    <!-- i in days_and_color.event_days_as_set dit zal de inner dictionary met key "event_days_as_set" aanspreken -->
-                                    {% if i in days_and_color.event_days_as_set %}
-
-                                        <div class="p-2 rounded-md text-white" style="background-color: rgb({{days_and_color.rgb.r}}, {{days_and_color.rgb.g}}, {{days_and_color.rgb.b}});">
-                                            {{ event.eventid.eventType.type }}<br>
-                                            {{ event.eventid.itemid.naam }}<br>
-                                            {{ event.calenderid.userid.username }}<br>
+                                        {% endfor %}
                                         </div>
-                                    {% endif %}
-                                {% endfor %}
+                                    </div>
                                 </div>
                             {% endfor %}
                         </div>
@@ -72,8 +75,8 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="grid bg-slate-400 rounded-xl p-4 sm:p-8 font-medium">
-                    <a class="" href="event-manager">Manage Events</a>
+                <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
+                    <a class="grid bg-slate-200 rounded-md place-content-center p-4 text-lg font-medium" href="event-manager">Manage Events</a>
                 </div>
             </div>
         </div>

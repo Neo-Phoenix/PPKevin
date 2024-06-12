@@ -43,8 +43,8 @@ class Event(models.Model):
 
 
 class CalendarEvent(models.Model):
-    calenderid = models.ForeignKey(Calendar, on_delete=models.CASCADE)
+    calendarid = models.ForeignKey(Calendar, on_delete=models.CASCADE)
     eventid = models.ForeignKey(Event, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Calenderid: {self.calenderid} Event: {self.eventid}, CalendarEvent ID: {self.id}"
+        return f"Calenderid: {self.calendarid} Event: {self.eventid}, CalendarEvent ID: {self.id}"
