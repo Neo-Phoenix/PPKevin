@@ -82,10 +82,16 @@ def overview(request):
 def event_manager(request):
     #check of user is ingelogd
     if request.user.is_authenticated:
-
+        #alle objecten van model van models.py
+        items = Item.objects.all()
+        users = User.objects.all()
+        calendar_events = CalendarEvent.objects.all()
+        event_types = EventType.objects.all()
+        print(calendar_events)
         # event CRUD handling
         if request.method == "POST":
             event_id = request.POST.get('event_id')
+            calendar_event_id = request.POST.get('calendar_event_id')
             action = request.POST.get('action')
             
             #todo: check eerst of data niet leeg is en geldig is met database opties
@@ -96,7 +102,7 @@ def event_manager(request):
             end_date = request.POST.get('end_date')
         
             userid = get_object_or_404(User, username=user_username)
-
+            
             #print(f"{event.id} en {event_id} en {action}")
             #check of end_date niet voor start_date komt
             if start_date>=end_date:
@@ -121,7 +127,9 @@ def event_manager(request):
 
             elif action == 'Delete':
                 # Delete the event
+                event = get_object_or_404(Event, id=event_id)
                 event.delete()
+
                 messages.success(request, 'Event deleted successfully.')
 
             elif action == 'Create':
@@ -130,21 +138,67 @@ def event_manager(request):
                 new_event = Event(eventType=eventType, itemid=itemid, start=start_date, end=end_date)
                 #print(new_event)
 
-                new_event.save()
-                calendarid = get_object_or_404(Calendar, userid=userid)
-                new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
-                new_calender_event.save()
-                # calendarid = get_object_or_404(Calendar, userid=userid)
-                # new_calender_event = CalendarEvent(calendarid=calendarid, eventid=event )
+                start_new_event =datetime.strptime(str(new_event.start), "%Y-%m-%d")
+                end_new_event = datetime.strptime(str(new_event.end), "%Y-%m-%d")
 
-                # print(new_calender_event)
+                #print(start, end)
+                #een item kan meer aan een persoon uitgeleend worden, check of item vrij is voor deze periode
+                overlap_flag = False
+                for calendar_event1 in calendar_events:
+                    #check eerst of item hetzelfde is van calendar_event1 instance
+                    if new_event.itemid == calendar_event1.eventid.itemid:
+                        #print(new_event.itemid.naam, calendar_event1.eventid.itemid.naam)
+                        start_old_event = datetime.strptime(str(calendar_event1.eventid.start), "%Y-%m-%d")
+                        end_old_event = datetime.strptime(str(calendar_event1.eventid.end), "%Y-%m-%d")
 
-        
-        #alle objecten van model van models.py
-        items = Item.objects.all()
-        users = User.objects.all()
-        calendar_events = CalendarEvent.objects.all()
-        event_types = EventType.objects.all()
+                        print(start_new_event.day, end_new_event.day, "and", start_old_event.day, end_old_event.day)
+
+                        if start_new_event <= end_old_event and end_new_event >= start_old_event:
+                            if start_new_event >= start_old_event and end_new_event <= end_old_event:
+                                print("Start en einddag lopen in periode van andere reservering")
+                                messages.warning(request, "Start and end dates fall within the period of another reservation")
+                                overlap_flag = True
+                                break
+                            elif start_new_event <= start_old_event and end_new_event >= end_old_event:
+                                print("Start en einddag lopen over een periode van andere reservering")
+                                messages.warning(request, "New event spans across the entire period of another reservation")
+                                overlap_flag = True
+                                break
+                            elif start_new_event <= end_old_event and end_new_event >= start_old_event:
+                                if start_new_event <= end_old_event:
+                                    print("Startdag loopt in periode van andere reservering")
+                                    messages.warning(request, "Start date overlaps with the period of another reservation")
+                                else:
+                                    print("Einddag loopt in periode van andere reservering")
+                                    messages.warning(request, "End date overlaps with the period of another reservation")
+                                
+                                overlap_flag = True
+                                break
+                        else:
+                            print("Geen overlap")
+
+                if overlap_flag==False:
+                    new_event.save()
+                    calendarid = get_object_or_404(Calendar, userid=userid)
+                    new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
+                    new_calender_event.save()
+
+                    #update calendar_events met nieuw object om mee te geven aan render
+                    calendar_events = CalendarEvent.objects.all()
+                    #print(new_calender_event)
+                return render(request, 'app/event-manager.html', {
+                    'calendar_events': calendar_events,
+                    'event_types': event_types,
+                    'items': items,
+                    'users': users,
+                    "event_id": event_id, 
+                    "calendar_event_id": calendar_event_id, 
+                    "event_type": event_type, 
+                    "item_naam": item_naam, 
+                    "user_username": user_username, 
+                    "start_date": start_date, 
+                    "end_date": end_date
+                    })
 
         #Geef data door aan event manager view
         return render(request, 'app/event-manager.html', {

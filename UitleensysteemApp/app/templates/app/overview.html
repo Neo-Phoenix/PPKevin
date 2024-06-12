@@ -11,7 +11,7 @@
             </div>
             <div class="grid gap-4 sm:gap-x-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr]  grid-rows-[auto_1fr]">
                 <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">Welcome</h1>
-                <div class="grid bg-slate-400 rounded-xl gap-2 sm:px-8 sm:pb-8 p-4 ">
+                <div class="flex bg-slate-400 rounded-xl flex-col px-8 py-4">
                     <h2 class="text-xl text-slate-100 font-medium">
                         {% if chosen_month_to_text %}
                             All events for: {{chosen_month_to_text}}, 
@@ -21,8 +21,7 @@
                         {% endif %}
                         
                     </h2>
-                    <div class="grid content-stretch min-h-full">
-                        {% if calendar_event_dictionary %}
+                    <div class="grid content-stretch">
                         <div id="week" class="grid grid-cols-7 gap-2">
                             {% for i in days_in_chosen_month_as_set %}
                                 <div class=" bg-slate-200 rounded-md p-2">
@@ -72,7 +71,6 @@
                             {% endfor %}
                         </div>
 
-                        {% endif %}
                     </div>
                 </div>
                 <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
