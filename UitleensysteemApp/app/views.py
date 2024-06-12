@@ -35,7 +35,7 @@ def overview(request):
     #voor de maan july returned 'daysInCurrentMonth = calendar.monthrange(currentYear, currentMonth)' dit: (5, 30) 
     #30 is het aantal dagen voor de huidige maand nodig voor de kalender generatie daarom de [1] positie van de array aka tuple
     daysInCurrentMonth = calendar.monthrange(currentYear, currentMonth)[1]
-    listDaysInCurrentMonth = list(range(1, daysInCurrentMonth+1))
+    listDaysInCurrentMonth = set(range(1, daysInCurrentMonth+1))
     #print(f"{daysInCurrentMonth}")
     #check events van calendarEvent voor de huidige maand:
     calenderEventDictionary = {}
@@ -54,11 +54,11 @@ def overview(request):
         if calenderEventStartMonth == currentMonth:
             #check of enddate ook in maand zit anders einde dag van de maand
             if endDateTimeObjectOfCalendarEvent.month != currentMonth:
-                listDaysTillEndOfMonth = list(range(startDay, daysInCurrentMonth+1))
+                listDaysTillEndOfMonth = set(range(startDay, daysInCurrentMonth+1))
                 calenderEventDictionary[calendarEvent] = listDaysTillEndOfMonth
             # Generate and return the list of days
             else:
-                listDaysTillEndDate = list(range(startDay, endDay + 1))
+                listDaysTillEndDate = set(range(startDay, endDay + 1))
                 calenderEventDictionary[calendarEvent] = listDaysTillEndDate
     
     print(calenderEventDictionary)

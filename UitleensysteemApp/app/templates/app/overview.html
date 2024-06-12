@@ -27,7 +27,32 @@
                             {% for i in listDaysInCurrentMonth %}
                                 <div class="grid bg-slate-200 rounded-md gap-2 p-2">
                                     {{i}}
+
+                                    <!-- "for event, days"
+                                     Event zal de key bevatten en days zal de data bevatten die met die key geassocieerd is -->
                                     {% for event, days in calenderEventDictionary.items %}
+                                    <!-- "calenderEventDictionary.items"
+                                    Om over Key-Value Pairs te itereren moet de dictionary calenderEventDictionary omgezet worden met .items() (in Django is dit gewoon .items)
+                                    om zowel de key als de values van de keys te gebruiken in de for loop met "event, days".
+                                    
+                                    Dit zal de dictionary omzetten van:
+                                    {<eventObject instance1>: {21, 22, 23, ..., 30}, <eventObject instance2>: {10, 11, 12, ..., 26}}
+                                    naar:
+                                    [(<eventObject instance>, {21, 22, 23, ..., 30}), (<eventObject instance2>, {10, 11, 12, ..., 26})]
+
+                                    De default iteratie van Python met de for loop iterate enkel over de keys van de dictionary en niet de values.
+                                    Dus door .items() te gebruiken kun je over zowel de keys als de values itereren.
+                                    Nodig voor event.eventid.eventType.type tijdens de value check in days.
+
+                                    De complexiteit van het controleren op "Membership Check" (if i in days) in een lijst is O(n), waarbij n de lengte van de lijst is. 
+                                    dus heb ik days las is een set gedifined in plaats van een lijst, en wordt de complexiteit O(1).
+
+                                    Het gebruik van .items() zelf verandert de iteratiecomplexiteit niet, die blijft O(n) als days een list was, waarbij n het aantal items in de dictionary is.
+
+                                    De zoekimplementatie met een lidmaatschapscontrole "if i in days" in Python:
+                                    wanneer days een lijst is, voert een lineaire zoekopdracht uit met O(n) complexiteit. 
+                                    Ter vergelijking, het gebruik van een set zou O(1) gemiddelde tijdcomplexiteit voor "Membership Check" mogelijk maken.
+                                    -->
                                     {% if i in days %}
                                         <div class="bg-slate-300 p-2">
                                             {{ event.eventid.eventType.type }}<br>
