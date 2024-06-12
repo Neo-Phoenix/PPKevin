@@ -65,11 +65,13 @@ def overview(request):
         else:
             event_days_as_set = {}
 
-        calendar_event_dictionary[calendar_event] = event_days_as_set
+        rgb = hash_to_rgb(calendar_event, "dark", 47, 98, 12)
+        #calender_event is de key dat als object wordt meegegeven
+        calendar_event_dictionary[calendar_event] = {'event_days_as_set': event_days_as_set, 'rgb': rgb}
 
     
-    print(calendar_event_dictionary)
-    print(days_in_chosen_month_as_set)
+    #print(calendar_event_dictionary)
+    #print(days_in_chosen_month_as_set)
     return render(request, 'app/overview.html', {
         "calendar_event_dictionary": calendar_event_dictionary, 
         "days_in_chosen_month_as_set": days_in_chosen_month_as_set, 
