@@ -6,7 +6,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from app.models import *
 from datetime import datetime
-import calendar
+from app.utils import *
 
 # Create your views here.
 
@@ -21,53 +21,60 @@ def signup(request):
     return render(request, 'app/signup.html')
 
 def overview(request):
-    allCalendarEvents = CalendarEvent.objects.all()
-    currentDateTime = datetime.now()
-    currentYear = currentDateTime.year
-    currentMonth = currentDateTime.month
+    chosen_month_and_year = ""
 
-    # Month in text 
-    currentMonthInText = currentDateTime.strftime("%B")
-    currentYearInText = currentDateTime.strftime("%Y")
+    if request.method == "POST":
+        chosen_month = request.POST.get('chosen_month')
+        chosen_year = request.POST.get('chosen_year')
+        chosen_month_and_year = {'month': chosen_month, 'year': chosen_year}
 
-    currentDate = currentDateTime.date()
+    all_calendar_events = CalendarEvent.objects.all()
 
-    #voor de maan july returned 'daysInCurrentMonth = calendar.monthrange(currentYear, currentMonth)' dit: (5, 30) 
-    #30 is het aantal dagen voor de huidige maand nodig voor de kalender generatie daarom de [1] positie van de array aka tuple
-    daysInCurrentMonth = calendar.monthrange(currentYear, currentMonth)[1]
-    listDaysInCurrentMonth = set(range(1, daysInCurrentMonth+1))
-    #print(f"{daysInCurrentMonth}")
-    #check events van calendarEvent voor de huidige maand:
-    calenderEventDictionary = {}
-    for calendarEvent in allCalendarEvents:
+    #chosen_month_and_year in this format {'month': 6, 'year': 2024}
+    processed_calendar = process_calendar(chosen_month_and_year)
 
-        #strptime vraag string aan geen object daarom str() dan .month om enkel de converted maand over te houden
-        startDateTimeObjectOfCalendarEvent = datetime.strptime(str(calendarEvent.eventid.start), "%Y-%m-%d")
-        endDateTimeObjectOfCalendarEvent = datetime.strptime(str(calendarEvent.eventid.end), "%Y-%m-%d")
+    chosen_month = processed_calendar.get('chosen_month')
+    processed_calendar.get('chosen_months_year')
+    chosen_month_to_text = processed_calendar.get('chosen_month_to_text')
+    chosen_months_year_to_text = processed_calendar.get('chosen_months_year_to_text')
+    days_in_chosen_month = processed_calendar.get('days_in_chosen_month')
+    days_in_chosen_month_as_set = processed_calendar.get('days_in_chosen_month_as_set')
 
-        calenderEventStartMonth = startDateTimeObjectOfCalendarEvent.month
-        startDay = int(startDateTimeObjectOfCalendarEvent.day)
-        endDay = int(endDateTimeObjectOfCalendarEvent.day)
+    #deze code block zal een {<calenderEventobject instance1>, {2,3,4,5}}
+    calendar_event_dictionary = {}
+    for calendar_event in all_calendar_events:
+        #strptime vraagt string aan, geen object daarom str() dan .month om enkel de converted maand over te houden
+        start_date_time_object_of_calendar_event = datetime.strptime(str(calendar_event.eventid.start), "%Y-%m-%d")
+        end_date_time_object_of_calendar_event = datetime.strptime(str(calendar_event.eventid.end), "%Y-%m-%d")
 
-        #print(f"{calenderEventStartMonthString} and {currentMonth}")
+        calendar_event_start_month = start_date_time_object_of_calendar_event.month
+        calendar_event_end_month = end_date_time_object_of_calendar_event.month
+        start_day = int(start_date_time_object_of_calendar_event.day)
+        end_day = int(end_date_time_object_of_calendar_event.day)
 
-        if calenderEventStartMonth == currentMonth:
-            #check of enddate ook in maand zit anders einde dag van de maand
-            if endDateTimeObjectOfCalendarEvent.month != currentMonth:
-                listDaysTillEndOfMonth = set(range(startDay, daysInCurrentMonth+1))
-                calenderEventDictionary[calendarEvent] = listDaysTillEndOfMonth
-            # Generate and return the list of days
-            else:
-                listDaysTillEndDate = set(range(startDay, endDay + 1))
-                calenderEventDictionary[calendarEvent] = listDaysTillEndDate
+        #print(f"{calenderEventStartMonthString} and {chosen_month}")
+        #elifs zijn meer cpu efficient anders checkt deze door elke case, ookal is event_days_as_set al ingevuld
+        if calendar_event_start_month == chosen_month and calendar_event_end_month == chosen_month:
+            event_days_as_set = set(range(start_day, end_day + 1))
+        elif calendar_event_start_month == chosen_month and calendar_event_end_month > chosen_month:
+            event_days_as_set = set(range(start_day, days_in_chosen_month + 1))
+        elif calendar_event_start_month < chosen_month and calendar_event_end_month == chosen_month:
+            event_days_as_set = set(range(1, end_day + 1))
+        elif calendar_event_start_month < chosen_month and calendar_event_end_month > chosen_month:
+            event_days_as_set = set(range(1, days_in_chosen_month + 1))
+        else:
+            event_days_as_set = {}
+
+        calendar_event_dictionary[calendar_event] = event_days_as_set
+
     
-    print(calenderEventDictionary)
-    print(listDaysInCurrentMonth)
+    print(calendar_event_dictionary)
+    print(days_in_chosen_month_as_set)
     return render(request, 'app/overview.html', {
-        "calenderEventDictionary": calenderEventDictionary, 
-        "listDaysInCurrentMonth": listDaysInCurrentMonth, 
-        "currentMonthInText":currentMonthInText,
-        "currentYearInText": currentYearInText
+        "calendar_event_dictionary": calendar_event_dictionary, 
+        "days_in_chosen_month_as_set": days_in_chosen_month_as_set, 
+        "chosen_month_to_text":chosen_month_to_text,
+        "chosen_months_year_to_text": chosen_months_year_to_text
         })
 
 def event_manager(request):
@@ -76,30 +83,30 @@ def event_manager(request):
 
         # event CRUD handling
         if request.method == "POST":
-            eventID = request.POST.get('event_id')
+            event_id = request.POST.get('event_id')
             action = request.POST.get('action')
-            event = get_object_or_404(Event, id=eventID)
-            print(f"{event.id} en {eventID} en {action}")
+            event = get_object_or_404(Event, id=event_id)
+            print(f"{event.id} en {event_id} en {action}")
 
 
             if action == "Update":
                 #todo: check eerst of data niet leeg is en geldig is met database opties
-                eventType = request.POST.get('event_type')
+                event_type = request.POST.get('event_type')
                 item_naam = request.POST.get('item_naam')
-                startDate = request.POST.get('start_date')
-                endDate = request.POST.get('end_date')
+                start_date = request.POST.get('start_date')
+                end_date = request.POST.get('end_date')
 
-                #print(f"Event: {event}, Event ID: {eventID}, Action: {action}, EventType: {eventType}, Start Date: {startDate}, End Date: {endDate}")
+                #print(f"Event: {event}, Event ID: {event_id}, Action: {action}, event_type: {event_type}, Start Date: {start_date}, End Date: {end_date}")
                 
-                #check of endDate niet voor startDate komt
-                if startDate>=endDate:
-                    messages.warning(request, f"Dates are incorrect: {endDate} is before {startDate}") 
+                #check of end_date niet voor start_date komt
+                if start_date>=end_date:
+                    messages.warning(request, f"Dates are incorrect: {end_date} is before {start_date}") 
                 else:
-                    event.start = startDate
-                    event.end = endDate
+                    event.start = start_date
+                    event.end = end_date
                     event.itemid = get_object_or_404(Item, naam=item_naam)
-                    # Check eventtype object of object ook echt bestaat met de gegeven eventType
-                    event.eventType = get_object_or_404(EventType, type=eventType)
+                    # Check eventtype object of object ook echt bestaat met de gegeven event_type
+                    event.event_type = get_object_or_404(EventType, type=event_type)
                     
                     event.save()
                     messages.success(request, 'Event updated successfully.')
@@ -110,12 +117,15 @@ def event_manager(request):
                 messages.success(request, 'Event deleted successfully.')
         
         #alle objecten van model van models.py
-        Items = Item.objects.all()
-        CalendarEvents = CalendarEvent.objects.all()
-        EventTypes = EventType.objects.all()
+        items = Item.objects.all()
+        calendar_events = CalendarEvent.objects.all()
+        event_types = EventType.objects.all()
 
         #Geef data door aan event manager view
-        return render(request, 'app/event-manager.html', {'calendarEvents': CalendarEvents, 'EventTypes': EventTypes, 'Items': Items})
+        return render(request, 'app/event-manager.html', {
+            'calendar_events': calendar_events,
+            'event_types': event_types,
+            'items': items})
     else:
         return render(request, 'app/event-manager.html')
 
@@ -137,10 +147,10 @@ def register(request):
     lastname = request.POST.get("lastname")
     password = request.POST.get("password")
     email = request.POST.get("email")
-    passwordCheck = request.POST.get("passwordCheck")
+    password_check = request.POST.get("password_check")
 
     #Check of alle values ingevuld zijn met all() dit filtered ook None values eruit van QueryDict.get(key, default=None) anders error message
-    if not all([firstname, lastname, email, password, passwordCheck]):
+    if not all([firstname, lastname, email, password, password_check]):
         messages.warning(request, 'Error missing fields.')
         return render(request, 'app/signup.html', {'firstname': firstname, 'lastname': lastname, 'email': email})
     
@@ -153,7 +163,7 @@ def register(request):
         return render(request, 'app/signup.html', {'firstname': firstname, 'lastname': lastname, 'email': email})
 
     #Check paswoord ook hetzelfde is
-    if password == passwordCheck:
+    if password == password_check:
         User.objects.create_user(username=email, email=email, password=password, first_name=firstname, last_name=lastname)
         messages.warning(request, "Succesfully registered, please login.")
         return render(request, 'app/signin.html', {'firstname': firstname, 'lastname': lastname, 'email': email})

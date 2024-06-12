@@ -13,26 +13,26 @@
                 <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500 ">Welcome</h1>
                 <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
                     <h2>
-                        {% if currentMonthInText %}
-                            All events for: {{currentMonthInText}}, 
+                        {% if chosen_month_to_text %}
+                            All events for: {{chosen_month_to_text}}, 
                         {% endif %}
-                        {% if currentMonthInText %}
-                            {{currentYearInText}}
+                        {% if chosen_month_to_text %}
+                            {{chosen_months_year_to_text}}
                         {% endif %}
                         
                     </h2>
                     <div class="grid content-stretch min-h-full">
-                        {% if calenderEventDictionary %}
+                        {% if calendar_event_dictionary %}
                         <div id="week" class="grid grid-cols-7 gap-2">
-                            {% for i in listDaysInCurrentMonth %}
+                            {% for i in days_in_chosen_month_as_set %}
                                 <div class="grid bg-slate-200 rounded-md gap-2 p-2">
                                     {{i}}
 
                                     <!-- "for event, days"
                                      Event zal de key bevatten en days zal de data bevatten die met die key geassocieerd is -->
-                                    {% for event, days in calenderEventDictionary.items %}
-                                    <!-- "calenderEventDictionary.items"
-                                    Om over Key-Value Pairs te itereren moet de dictionary calenderEventDictionary omgezet worden met .items() (in Django is dit gewoon .items)
+                                    {% for event, days in calendar_event_dictionary.items %}
+                                    <!-- "calendar_event_dictionary.items"
+                                    Om over Key-Value Pairs te itereren moet de dictionary calendar_event_dictionary omgezet worden met .items() (in Django is dit gewoon .items)
                                     om zowel de key als de values van de keys te gebruiken in de for loop met "event, days".
                                     
                                     Dit zal de dictionary omzetten van:
