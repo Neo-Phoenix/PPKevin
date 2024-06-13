@@ -25,7 +25,7 @@
                         <li class="bg-slate-700 rounded-xl p-4">
                             <form method="post" action="user-manager" id="Create">{% csrf_token %}
                                 <div class="grid bg-slate-800 rounded-2xl p-4 gap-2">
-                                    <h3 class="text-white">{{ calendar_event.eventid }}</h3>
+                                    <h3 class="text-white">New User</h3>
 
                                     <input class="text-slate-800" name="user_first_name" value="{{user_first_name}}" placeholder="Enter first name" required></input>
                                     <input class="text-slate-800" name="user_last_name" value="{{user_last_name}}" placeholder="Enter last name" required></input>
