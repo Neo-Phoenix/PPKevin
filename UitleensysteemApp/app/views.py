@@ -219,7 +219,130 @@ def event_manager(request):
         return render(request, 'app/event-manager.html')
 
 def user_manager(request):
-    return render(request, 'app/user-manager.html')
+    #check of user is ingelogd
+    if request.user.is_authenticated:
+        #alle objecten van model van models.py
+        users = User.objects.all()
+
+        #print(calendar_events)
+        # event CRUD handling
+        if request.method == "POST":
+            action = request.POST.get('action')
+            
+            #todo: check eerst of data niet leeg is en geldig is met database opties
+            user_id = request.POST.get('user_id')
+            user_username = request.POST.get('user_username')
+            user_first_name = request.POST.get('user_first_name')
+            user_last_name = request.POST.get('user_last_name')
+            user_password = request.POST.get('user_password')
+            user_password_check = request.POST.get('user_password_check')
+            user_email = user_username
+
+
+            if action == "Update":
+                user = get_object_or_404(User, id=user_id)
+                user_temp = copy.deepcopy(user)
+
+                print(user_username)
+
+                try:
+                    validate_email(user_username)
+                    #Validate_email van validators gooit een error, geen boolean, dus error handling moet gebeuren
+                except ValidationError:
+                    messages.warning(request, 'Invalid email address.')
+                    return render(request, 'app/user-manager.html', {
+                        'user_username': user_username,
+                        'user_first_name': user_first_name,
+                        'user_last_name': user_last_name,
+                        'user_email' : user_email,
+                        'users': users
+                    })
+                user.username = user_username
+                user.first_name = user_first_name
+                user.last_name = user_last_name
+                user.email = user_email
+                if user_password:
+                    user.set_password(user_password)
+
+                # Default checked Django models.Model implementatie dus de ids van de object, 
+                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
+                if (user.__str__ == user_temp.__str__):
+                    print("1", user, "and", user_temp)
+                    messages.warning(request, "No changes detected from the updated event") 
+                else:
+                    #print("2", event, event_temp)
+                    user.save()
+                    
+                    messages.success(request, 'User updated successfully.')
+
+            elif action == 'Delete':
+                # Delete the event
+                user = get_object_or_404(User, id=user_id)
+                user.delete()
+
+                messages.success(request, 'User deleted successfully.')
+
+            elif action == 'Create':
+                if not all([user_first_name, user_last_name, user_email, user_password, user_password_check]):
+                    messages.warning(request, 'Error missing fields.')
+                    return render(request, 'app/user-manager.html', {
+                        'user_username': user_username,
+                        'user_first_name': user_first_name,
+                        'user_last_name': user_last_name,
+                        'user_email' : user_email,
+                        'users': users,
+
+                    })
+                        
+                #Email validatie met Django email validator
+                try:
+                    validate_email(user_email)
+                    #Validate_email van validators gooit een error, geen boolean, dus error handling moet gebeuren
+                except ValidationError:
+                    messages.warning(request, 'Invalid email address.')
+                    return render(request, 'app/user-manager.html', {
+                        'user_username': user_username,
+                        'user_first_name': user_first_name,
+                        'user_last_name': user_last_name,
+                        'user_email' : user_email,
+                        'users': users,
+                    })
+
+                #Check paswoord ook hetzelfde is
+                if user_password == user_password_check:
+                    User.objects.create_user(username=user_username, email=user_email, password=user_password, first_name=user_first_name, last_name=user_last_name)
+                    user = get_object_or_404(User, username=user_username)
+
+                    calendar = Calendar(userid=user, description=user.username)
+                    calendar.save()
+                    messages.success(request, "Succesfully added user")
+                else:
+                    messages.warning(request, "Password doesn't match.")
+                    return render(request, 'app/user-manager.html', {
+                        'user_username': user_username,
+                        'user_first_name': user_first_name,
+                        'user_last_name': user_last_name,
+                        'user_email' : user_email,
+                        'users': users,
+                    })
+
+                #update users met nieuw object om mee te geven aan render
+                users = CalendarEvent.objects.all()
+                #print(new_calender_event)
+                return render(request, 'app/user-manager.html', {
+                    'user_username': user_username,
+                    'user_first_name': user_first_name,
+                    'user_last_name': user_last_name,
+                    'user_email' : user_email,
+                    'users': users,
+                })
+
+        #Geef data door aan event manager view
+        return render(request, 'app/user-manager.html', {
+            'users': users
+            })
+    else:
+        return render(request, 'app/user-manager.html')
 
 def item_manager(request):
     return render(request, 'app/item-manager.html')
@@ -262,7 +385,7 @@ def register(request):
         user = get_object_or_404(User, username=email)
         calendar = Calendar(userid=user, description=user.username)
         calendar.save()
-        messages.warning(request, "Succesfully registered, please login.")
+        messages.success(request, "Succesfully registered, please login.")
         return render(request, 'app/signin.html', {'firstname': firstname, 'lastname': lastname, 'email': email})
     else:
         messages.warning(request, "Password doesn't match.")
