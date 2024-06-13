@@ -828,6 +828,58 @@ select {
   min-height: 100vh;
 }
 
+.min-h-4 {
+  min-height: 1rem;
+}
+
+.min-h-8 {
+  min-height: 2rem;
+}
+
+.min-h-16 {
+  min-height: 4rem;
+}
+
+.min-h-12 {
+  min-height: 3rem;
+}
+
+.min-h-10 {
+  min-height: 2.5rem;
+}
+
+.min-h-9 {
+  min-height: 2.25rem;
+}
+
+.min-h-11 {
+  min-height: 2.75rem;
+}
+
+.min-w-8 {
+  min-width: 2rem;
+}
+
+.min-w-16 {
+  min-width: 4rem;
+}
+
+.min-w-32 {
+  min-width: 8rem;
+}
+
+.min-w-20 {
+  min-width: 5rem;
+}
+
+.min-w-24 {
+  min-width: 6rem;
+}
+
+.min-w-2 {
+  min-width: 0.5rem;
+}
+
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
@@ -858,6 +910,14 @@ select {
 
 .place-content-end {
   place-content: end;
+}
+
+.place-content-between {
+  place-content: space-between;
+}
+
+.place-items-center {
+  place-items: center;
 }
 
 .content-stretch {
@@ -981,6 +1041,11 @@ select {
   background-color: rgb(253 224 71 / var(--tw-bg-opacity));
 }
 
+.bg-slate-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(100 116 139 / var(--tw-bg-opacity));
+}
+
 .bg-gradient-to-b {
   background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
 }
@@ -1031,6 +1096,11 @@ select {
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .pb-2 {

@@ -22,11 +22,15 @@ def signup(request):
     return render(request, 'app/signup.html')
 
 def overview(request):
+    now=datetime.now()
+    time = now.strftime("%Y-%m")
     chosen_month_and_year = ""
 
     if request.method == "POST":
-        chosen_month = request.POST.get('chosen_month')
-        chosen_year = request.POST.get('chosen_year')
+        time = request.POST.get('time')
+        timeDateTime = datetime.strptime(str(time), "%Y-%m")
+        chosen_month = timeDateTime.month
+        chosen_year = timeDateTime.year
         chosen_month_and_year = {'month': chosen_month, 'year': chosen_year}
 
     all_calendar_events = CalendarEvent.objects.all()
@@ -80,6 +84,7 @@ def overview(request):
     print(calendar_event_dictionary)
     #print(days_in_chosen_month_as_set)
     return render(request, 'app/overview.html', {
+        'time': time,
         "calendar_event_dictionary": calendar_event_dictionary, 
         "days_in_chosen_month_as_set": days_in_chosen_month_as_set, 
         "chosen_month_to_text":chosen_month_to_text,
