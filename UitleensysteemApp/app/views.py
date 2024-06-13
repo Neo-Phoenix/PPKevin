@@ -43,7 +43,13 @@ def overview(request):
 
     #deze code block zal een {<calenderEventobject instance1>, {2,3,4,5}}
     calendar_event_dictionary = {}
+            
     for calendar_event in all_calendar_events:
+        #check of het admin is en skip rendering
+        if calendar_event.calendarid.userid.username == "Admin":
+            continue
+
+
         #strptime vraagt string aan, geen object daarom str() dan .month om enkel de converted maand over te houden
         start_date_time_object_of_calendar_event = datetime.strptime(str(calendar_event.eventid.start), "%Y-%m-%d")
         end_date_time_object_of_calendar_event = datetime.strptime(str(calendar_event.eventid.end), "%Y-%m-%d")
@@ -85,8 +91,13 @@ def event_manager(request):
     if request.user.is_authenticated:
         #alle objecten van model van models.py
         items = Item.objects.all()
-        users = User.objects.all()
-        calendar_events = CalendarEvent.objects.all()
+
+        #skip admin rendering
+        admin = get_object_or_404(User, username="Admin")
+        adminCalendar = get_object_or_404(Calendar, userid=admin)
+        users = User.objects.exclude(username='Admin')
+        calendar_events = CalendarEvent.objects.exclude(calendarid=adminCalendar)
+
         event_types = EventType.objects.all()
         #print(calendar_events)
         # event CRUD handling
@@ -113,7 +124,9 @@ def event_manager(request):
                 event = get_object_or_404(Event, id=event_id)
                 event_temp = copy.deepcopy(event)
 
-                calendar_event = get_object_or_404(CalendarEvent, eventid=event_id)
+                user = get_object_or_404(User, username=user_username)
+                userCalender = get_object_or_404(Calendar, userid=user)
+                calendar_event = get_object_or_404(CalendarEvent, eventid=event_id, calendarid=userCalender)
                 #print(f"Event: {event}, Event ID: {event_id}, Action: {action}, event_type: {event_type}, Start Date: {start_date}, End Date: {end_date}")                
                 event.start = start_date
                 event.end = end_date
@@ -122,12 +135,12 @@ def event_manager(request):
                 event.eventType = get_object_or_404(EventType, type=event_type)
 
                 # Default checked Django models.Model implementatie dus de ids van de object, 
-                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
-                if (event.__str__ == event_temp.__str__):
+                # maar ik vergelijk de string representatie van de class die dus een stringrepresentatie bevat van de inhoud 
+                if (str(event) == str(event_temp)):
                     print("1", event, "and", event_temp)
                     messages.warning(request, "No changes detected from the updated event") 
                 else:
-                    #print("2", event, event_temp)
+                    print("2", str(event), str(event_temp))
                     checked = check_overlap(event)
                     if checked['overlap_flag']==False:
                         event.save()
@@ -161,9 +174,18 @@ def event_manager(request):
                     calendarid = get_object_or_404(Calendar, userid=userid)
                     new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
                     new_calender_event.save()
+
+                    admin = get_object_or_404(User, username="Admin")
+                    adminCalendar = get_object_or_404(Calendar, userid=admin)
+                    if not CalendarEvent.objects.filter(calendarid=adminCalendar, eventid=new_event).exists():
+                        print("ook aan admin kalender toegevoegd")
+
+                        new_calender_event = CalendarEvent(calendarid=adminCalendar, eventid=new_event)
+                        new_calender_event.save()
+
                     messages.success(request, f"Event succesfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
                     #update calendar_events met nieuw object om mee te geven aan render
-                    calendar_events = CalendarEvent.objects.all()
+                    calendar_events = CalendarEvent.objects.exclude(calendarid=adminCalendar)
                     #print(new_calender_event)
                 else:
                     messages.error(request, checked['warning'])
@@ -195,7 +217,7 @@ def user_manager(request):
     #check of user is ingelogd
     if request.user.is_authenticated:
         #alle objecten van model van models.py
-        users = User.objects.all()
+        users = User.objects.exclude(username='Admin')
 
         #print(calendar_events)
         # event CRUD handling
@@ -238,8 +260,8 @@ def user_manager(request):
                     user.set_password(user_password)
 
                 # Default checked Django models.Model implementatie dus de ids van de object, 
-                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
-                if (user.__str__ == user_temp.__str__):
+                # maar ik vergelijk de string representatie van de class die dus een stringrepresentatie bevat van de inhoud 
+                if (str(user) == str(user_temp)):
                     print("1", user, "and", user_temp)
                     messages.warning(request, "No changes detected from the updated event") 
                 else:
@@ -348,8 +370,8 @@ def item_manager(request):
                 item.itemTypeID = get_object_or_404(ItemType, type=item_type)
 
                 # Default checked Django models.Model implementatie dus de ids van de object, 
-                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
-                if (item.__str__ == item_temp.__str__):
+                # maar ik vergelijk de string representatie van de class die dus een stringrepresentatie bevat van de inhoud 
+                if (str(item) == str(item_temp)):
                     print("1", item, "and", item_temp)
                     messages.warning(request, "No changes detected from the updated event") 
                 else:
