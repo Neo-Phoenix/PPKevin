@@ -23,41 +23,15 @@
                     <h2 class="text-xl text-slate-100 font-medium">Create New User</h2>
                     <ul class="grid gap-4">
                         <li class="bg-slate-700 rounded-xl p-4">
-                            <form method="post" action="event-manager" id="Create">{% csrf_token %}
+                            <form method="post" action="user-manager" id="Create">{% csrf_token %}
                                 <div class="grid bg-slate-800 rounded-2xl p-4 gap-2">
-                                    <h3 class="text-white">Create New Event</h3>
-                                    <select class="text-slate-800" name="event_type" >
-                                    {% for eventtype in event_types %}
-                                        {% if eventtype.type == event_type %}
-                                            <option value='{{ eventtype.type }}' selected>{{ eventtype.type }}</option>
-                                            {% else %}
-                                                <option value='{{ eventtype.type }}'>{{ eventtype.type }}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                    </select>
+                                    <h3 class="text-white">{{ calendar_event.eventid }}</h3>
 
-                                    <select class="text-slate-800" name="item_naam" >
-                                        {% for item in items %}
-                                            {% if item.naam == item_naam %}
-                                                <option value='{{ item.naam }}' selected>{{ item.naam }}</option>
-                                            {% else %}
-                                                <option value='{{ item.naam }}'>{{ item.naam }}</option>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </select>
-
-                                    <select class="text-slate-800" name="user_username">
-                                        {% for user in users %}
-                                            {% if user.username == user_username %}
-                                                <option value='{{ user.username }}' selected>{{ user.username }}</option>
-                                            {% else %}
-                                                <option value='{{ user.username }}'>{{ user.username }}</option>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </select>
-
-                                    <input type="date" name="start_date" value="{{ start_date }}"></input>
-                                    <input type="date" name="end_date" value="{{ end_date }}"></input>
+                                    <input class="text-slate-800" name="user_first_name" value="{{user_first_name}}" placeholder="Enter first name" required></input>
+                                    <input class="text-slate-800" name="user_last_name" value="{{user_last_name}}" placeholder="Enter last name" required></input>
+                                    <input class="text-slate-800" name="user_username" value="{{user_username}}" placeholder="Enter email"></input>
+                                    <input type="password" class="text-slate-800" name="user_password" placeholder="Enter new password"></input>
+                                    <input type="password" class="text-slate-800" name="user_password_check" placeholder="Enter password again"></input>
 
                                 </div>
                                 <div class="flex place-content-end gap-4 py-4">
@@ -66,72 +40,24 @@
                             </form>
                         </li>
                         <h2 class="text-xl text-slate-100 font-medium">Edit Users</h2>
-                        {% if calendar_events %}
-                            {% for calendar_event in calendar_events %}
+                        {% if users %}
+                            {% for user in users %}
                                 <li class="bg-slate-700 rounded-xl p-4">
-                                    <form method="post" action="event-manager" id="{{ calendar_event.id }}">{% csrf_token %}
+                                    <form method="post" action="user-manager" id="{{ user.id }}">{% csrf_token %}
                                         <div class="grid bg-slate-800 rounded-2xl p-4 gap-2">
                                             <h3 class="text-white">{{ calendar_event.eventid }}</h3>
-                                            <select class="text-slate-800" name="event_type" >
-                                            {% for eventtype in event_types %}
-                                                {% if calendar_event.eventid.eventType.type == eventtype.type %}
-                                                    <option value='{{ eventtype.type }}' selected>{{ eventtype.type }}</option>
-                                                {% else %}
-                                                    <option value='{{ eventtype.type }}'>{{ eventtype.type }}</option>
-                                                {% endif %}
-                                            {% endfor %}
-                                            </select>
 
-                                            <!-- 
-                                            {{calendar_event.eventid.itemid.naam}}
-                                            {% for item in Items %}
-                                                {{item}}
-                                            {% endfor %} -->
-                                            <select class="text-slate-800" name="item_naam" >
-                                                {% for item in items %}
-                                                    {% if calendar_event.eventid.itemid.naam == item.naam %}
-                                                        <option value='{{ item.naam }}' selected>{{ item.naam }}</option>
-                                                    {% else %}
-                                                        <option value='{{ item.naam }}'>{{ item.naam }}</option>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </select>
-
-                                            <select class="text-slate-800" name="user_username">
-                                                {% for user in users %}
-                                                    {% if calendar_event.calendarid.userid.username == user.username %}
-                                                        <option value='{{ user.username }}' selected>{{ user.username }}</option>
-                                                    {% else %}
-                                                        <option value='{{ user.username }}'>{{ user.username }}</option>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </select>
-                                            <!-- {% for eventtype in event_types %}
-                                                <p>{{ eventtype.type }}</p>
-                                                <p>{{ event.eventid.eventType.type }}</p>
-                                            {%endfor%} -->
-                                            <!-- {{ event.eventid.start }} -->
-
-                                            <!-- 
-                                            "| symbol is a pipe for Django Templates, It's used to apply filters to template variables."
-                                            "date" filter wordt gebruikt om date en time objects te filteren
-                                            ":" dubbele punt wordt gebruikt om basically argumenten aan filter date door te geven
-
-                                            "'Y-m-d': This is the format string argument passed to the date filter. It specifies how the date should be formatted.
-                                                Y: Represents the year in four digits (e.g., 2024).
-                                                m: Represents the month in two digits (e.g., 06 for June).
-                                                d: Represents the day in two digits (e.g., 09 for the 9th)."
-                                            
-                                            -->
-                                            <input type="date" name="start_date" value="{{ calendar_event.eventid.start|date:'Y-m-d' }}"></input>
-                                            <input type="date" name="end_date" value="{{ calendar_event.eventid.end|date:'Y-m-d' }}"></input>
+                                            <input class="text-slate-800" name="user_first_name" value="{{user.first_name}}" placeholder="Enter first name" required></input>
+                                            <input class="text-slate-800" name="user_last_name" value="{{user.last_name}}" placeholder="Enter last name" required></input>
+                                            <input class="text-slate-800" name="user_username" value="{{user.username}}" placeholder="Enter username" required></input>
+                                            <input type="password" class="text-slate-800" name="user_password" placeholder="Enter new password"></input>
+                                            <input type="password" class="text-slate-800" name="user_password_check" placeholder="Enter password again"></input>
 
                                         </div>
                                         <div class="flex place-content-end gap-4 py-4">
-                                            <input type="hidden" name="event_id" value="{{ calendar_event.eventid.id }}">
-                                            <input type="hidden" name="calendar_event_id" value="{{ calendar_event.eventid.id }}">
-                                            <button type="submit" name="action" class="bg-red-200 p-4 rounded-xl sm:min-w-40 text-center" value="Delete" form="{{ calendar_event.id }}">Delete</button>
-                                            <button type="submit" name="action" class="bg-green-200 p-4 rounded-xl sm:min-w-40 text-center" value="Update"form="{{ calendar_event.id }}">Update</button>
+                                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                                            <button type="submit" name="action" class="bg-red-200 p-4 rounded-xl sm:min-w-40 text-center" value="Delete" form="{{ user.id }}">Delete</button>
+                                            <button type="submit" name="action" class="bg-green-200 p-4 rounded-xl sm:min-w-40 text-center" value="Update"form="{{ user.id }}">Update</button>
                                         </div>
                                     </form>
                                 </li>
