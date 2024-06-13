@@ -1,0 +1,91 @@
+{% extends "app/base.html" %}
+
+{% block title%} EhB ESA | User Manager {% endblock %}
+
+{% block body %}
+    {% if request.user.is_authenticated %}
+    <div class="grid grid-rows-[auto_1fr] gap-4 min-h-screen p-4 sm:mx-16">
+        <div class="grid items-center bg-gray-200 rounded-2xl mt-8 px-4 py-4 sm:px-8 sm:py-4 grid-cols-[1fr_auto]">
+            <h1 class="font-bold text-2xl text-slate-600">Users</h1>
+            <a class="bg-slate-600 px-4 py-2 sm:py-4 rounded-2xl text-center text-slate-400 font-medium" href="logout_view">logout</a>
+        </div>
+        <div class="grid gap-4 sm:gap-x-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr]  grid-rows-[auto_1fr]">
+            <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">User Manager</h1>
+            <div class="grid bg-slate-400 rounded-xl gap-2 sm:px-8 sm:pb-8 p-4">
+                    {% if messages %}
+                    <div class="bg-yellow-300 rounded-md p-4 text-slate-600 text-center">
+                        {% for message in messages %}
+                            <div class="toast {{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+
+                    {% endif %}
+                    <div class="flex place-content-between place-items-center min-h-11">
+                        <h2 class="text-xl text-slate-100 font-medium">Create New User</h2>
+                    </div>
+                    <ul class="grid gap-4">
+                        <li class="bg-slate-700 rounded-xl p-4">
+                            <form method="post" action="user-manager" id="Create">{% csrf_token %}
+                                <div class="grid bg-slate-800 rounded-2xl p-4 gap-2">
+                                    <h3 class="text-white">New User</h3>
+
+                                    <input class="text-slate-800" name="user_first_name" value="{{user_first_name}}" placeholder="Enter first name" required></input>
+                                    <input class="text-slate-800" name="user_last_name" value="{{user_last_name}}" placeholder="Enter last name" required></input>
+                                    <input class="text-slate-800" name="user_username" value="{{user_username}}" placeholder="Enter email"></input>
+                                    <input type="password" class="text-slate-800" name="user_password" placeholder="Enter new password"></input>
+                                    <input type="password" class="text-slate-800" name="user_password_check" placeholder="Enter password again"></input>
+
+                                </div>
+                                <div class="flex place-content-end gap-4 py-4">
+                                    <button type="submit" name="action" class="bg-blue-200 p-4 rounded-xl sm:min-w-40 text-center" value="Create"form="Create">Create</button>
+                                </div>
+                            </form>
+                        </li>
+                        <h2 class="text-xl text-slate-100 font-medium">Edit Users</h2>
+                        {% if users %}
+                            {% for user in users %}
+                                <li class="bg-slate-700 rounded-xl p-4">
+                                    <form method="post" action="user-manager" id="{{ user.id }}">{% csrf_token %}
+                                        <div class="grid bg-slate-800 rounded-2xl p-4 gap-2">
+                                            <h3 class="text-white">{{ calendar_event.eventid }}</h3>
+
+                                            <input class="text-slate-800" name="user_first_name" value="{{user.first_name}}" placeholder="Enter first name" required></input>
+                                            <input class="text-slate-800" name="user_last_name" value="{{user.last_name}}" placeholder="Enter last name" required></input>
+                                            <input class="text-slate-800" name="user_username" value="{{user.username}}" placeholder="Enter username" required></input>
+                                            <input type="password" class="text-slate-800" name="user_password" placeholder="Enter new password"></input>
+                                            <input type="password" class="text-slate-800" name="user_password_check" placeholder="Enter password again"></input>
+
+                                        </div>
+                                        <div class="flex place-content-end gap-4 py-4">
+                                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                                            <button type="submit" name="action" class="bg-red-200 p-4 rounded-xl sm:min-w-40 text-center" value="Delete" form="{{ user.id }}">Delete</button>
+                                            <button type="submit" name="action" class="bg-green-200 p-4 rounded-xl sm:min-w-40 text-center" value="Update"form="{{ user.id }}">Update</button>
+                                        </div>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No events available</p>
+                        {% endif %}
+                </div>
+                <div class="flex bg-slate-400 rounded-xl p-4 sm:px-8 sm:py-4 gap-2 flex-col">
+                    <h2 class="text-xl text-slate-100 font-medium min-h-11">Navigation</h2>
+                    <div class="flex gap-4 flex-col">
+                    <a class="grid bg-slate-200 rounded-md place-content-center p-4 text-lg font-medium" href="overview">Go Back</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="grid grid-rows-[auto_1fr] gap-4 min-h-screen p-4 sm:mx-16">
+            <div class="gap-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8">
+                <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
+                   <a href="signin">
+                    <h1>please log in <u>here</u></h1>
+                   </a>
+                </div>
+            </div>
+        </div>
+    {% endif %} 
+{% endblock %}
