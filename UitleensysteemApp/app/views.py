@@ -345,7 +345,94 @@ def user_manager(request):
         return render(request, 'app/user-manager.html')
 
 def item_manager(request):
-    return render(request, 'app/item-manager.html')
+    #check of user is ingelogd
+    if request.user.is_authenticated:
+
+        #alle objecten van model van models.py
+        items = Item.objects.all()
+        item_types = ItemType.objects.all()
+
+        #print(calendar_events)
+        # event CRUD handling
+        if request.method == "POST":
+            action = request.POST.get('action')
+            
+            #todo: check eerst of data niet leeg is en geldig is met database opties
+            item_id = request.POST.get('item_id')
+            item_naam = request.POST.get('item_naam')
+            item_beschrijving = request.POST.get('item_beschrijving')
+            item_type = request.POST.get('item_type')
+
+            if action == "Update":
+                item = get_object_or_404(Item, id=item_id)
+                item_temp = copy.deepcopy(item)
+
+                print(item_naam)
+                enforced_item_name = enforce_item_name(item_naam)
+
+                item.naam = enforced_item_name
+                item.beschrijving = item_beschrijving
+                item.itemTypeID = get_object_or_404(ItemType, type=item_type)
+
+                # Default checked Django models.Model implementatie dus de ids van de object, 
+                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
+                if (item.__str__ == item_temp.__str__):
+                    print("1", item, "and", item_temp)
+                    messages.warning(request, "No changes detected from the updated event") 
+                else:
+                    #print("2", event, event_temp)
+                    item.save()
+                    
+                    messages.success(request, 'Item updated successfully.')
+
+            elif action == 'Delete':
+                # Delete the item
+                item = get_object_or_404(Item, id=item_id)
+                item.delete()
+
+                messages.success(request, 'User deleted successfully.')
+
+            elif action == 'Create':
+                if not all([item_naam, item_beschrijving]):
+                    messages.warning(request, 'Error missing fields.')
+                    return render(request, 'app/item-manager.html', {
+                        'item_id' : item_id,
+                        'item_naam': item_naam,
+                        'item_beschrijving': item_beschrijving,
+                        'item_type' : item_type,
+                        'items': items,
+                        'item_types' : item_types
+                    })
+                item_itemTypeID = get_object_or_404(ItemType, type=item_type)
+                enforced_item_name = enforce_item_name(item_naam)
+                #check of item al bestaat met filter() en exists() van Django
+                if not Item.objects.filter(naam=enforced_item_name).exists():
+                    new_item = Item(naam=enforced_item_name, beschrijving=item_beschrijving, itemTypeID=item_itemTypeID)
+                    new_item.save()
+                    messages.success(request, "Succesfully added item")
+                else:
+                    messages.error(request, f"Item already exists when parsing your item name in our enforced format, resulting in: \"{enforced_item_name}\"")
+
+
+                #update items met nieuw object om mee te geven aan render
+                items = Item.objects.all()
+                #print(new_calender_event)
+                return render(request, 'app/item-manager.html', {
+                    'item_id' : item_id,
+                    'item_naam': item_naam,
+                    'item_beschrijving': item_beschrijving,
+                    'item_type' : item_type,
+                    'items': items,
+                    'item_types' : item_types
+                })
+
+        #Geef data door aan event manager view
+        return render(request, 'app/item-manager.html', {
+            'items': items,
+            'item_types' : item_types
+            })
+    else:
+        return render(request, 'app/item-manager.html')
 
 def login(request):
     username = request.POST.get("username")
