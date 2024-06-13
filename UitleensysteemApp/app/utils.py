@@ -1,4 +1,5 @@
 from datetime import datetime
+from app.models import *
 import calendar
 import re
 from app.models import *
@@ -94,3 +95,47 @@ def enforce_item_name(item_naam):
     item_naam = re.sub(r'\s+', '-',str(item_naam).lower())
     print(item_naam)
     return item_naam
+
+def check_overlap(new_event:Event):
+    if not isinstance(new_event, Event):
+        raise TypeError(f"new_event van check_overlap(new_event,...) verwacht een Event instance")
+    
+    calendar_events = CalendarEvent.objects.all()
+    
+    start_new_event = datetime.strptime(str(new_event.start), "%Y-%m-%d")
+    end_new_event = datetime.strptime(str(new_event.end), "%Y-%m-%d")
+
+    warning = ""
+    overlap_flag = False
+    for calendar_event1 in calendar_events:
+        #check eerst of item hetzelfde is van calendar_event1 instance
+        if new_event.itemid == calendar_event1.eventid.itemid:
+            #skip eigen instance met zichzelf te checken voor overlap
+            if new_event.id == calendar_event1.eventid.id:
+                print(new_event.id, calendar_event1.eventid.id)
+                continue
+
+            start_old_event = datetime.strptime(str(calendar_event1.eventid.start), "%Y-%m-%d")
+            end_old_event = datetime.strptime(str(calendar_event1.eventid.end), "%Y-%m-%d")
+
+            #print(start_new_event.day, end_new_event.day, "and", start_old_event.day, end_old_event.day)
+            #check first if next event isnt the same object compared to itself
+            if start_new_event <= end_old_event and end_new_event >= start_old_event:
+                if start_new_event >= start_old_event and end_new_event <= end_old_event:
+                    print("Start en einddag lopen in periode van andere reservering")
+                    warning = "Start and end dates fall within the period of another reservation"    
+                elif start_new_event <= start_old_event and end_new_event >= end_old_event:
+                    print("Start en einddag lopen over een periode van andere reservering")
+                    warning = "New/Updated event spans across the entire period of another reservation"        
+                elif start_new_event <= end_old_event and end_new_event >= start_old_event:
+                    if start_new_event <= end_old_event:
+                        print("Startdag loopt in periode van andere reservering")
+                        warning = "Start date overlaps with the period of another reservation"
+                    else:
+                        print("Einddag loopt in periode van andere reservering")
+                        warning = "End date overlaps with the period of another reservation"     
+                overlap_flag = True
+                break
+            else:
+                print("Geen overlap")
+    return {'overlap_flag':overlap_flag, 'warning':warning, 'start_new_event': start_new_event, 'end_new_event': end_new_event}

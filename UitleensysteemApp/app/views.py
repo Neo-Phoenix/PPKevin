@@ -128,12 +128,16 @@ def event_manager(request):
                     messages.warning(request, "No changes detected from the updated event") 
                 else:
                     #print("2", event, event_temp)
-                    event.save()
-                    
-                    calendar_event.calendarid = get_object_or_404(Calendar, userid=userid)
-                    calendar_event.save()
+                    checked = check_overlap(event)
+                    if checked['overlap_flag']==False:
+                        event.save()
+                        
+                        calendar_event.calendarid = get_object_or_404(Calendar, userid=userid)
+                        calendar_event.save()
 
-                    messages.success(request, 'Event updated successfully.')
+                        messages.success(request, 'Event updated successfully.')
+                    else:
+                        messages.error(request, checked['warning'])
 
             elif action == 'Delete':
                 # Delete the event
@@ -148,52 +152,21 @@ def event_manager(request):
                 new_event = Event(eventType=eventType, itemid=itemid, start=start_date, end=end_date)
                 #print(new_event)
 
-                start_new_event =datetime.strptime(str(new_event.start), "%Y-%m-%d")
-                end_new_event = datetime.strptime(str(new_event.end), "%Y-%m-%d")
 
                 #print(start, end)
                 #een item kan meer aan een persoon uitgeleend worden, check of item vrij is voor deze periode
-                overlap_flag = False
-                for calendar_event1 in calendar_events:
-                    #check eerst of item hetzelfde is van calendar_event1 instance
-                    if new_event.itemid == calendar_event1.eventid.itemid:
-                        #print(new_event.itemid.naam, calendar_event1.eventid.itemid.naam)
-                        start_old_event = datetime.strptime(str(calendar_event1.eventid.start), "%Y-%m-%d")
-                        end_old_event = datetime.strptime(str(calendar_event1.eventid.end), "%Y-%m-%d")
-
-                        #print(start_new_event.day, end_new_event.day, "and", start_old_event.day, end_old_event.day)
-
-                        if start_new_event <= end_old_event and end_new_event >= start_old_event:
-                            if start_new_event >= start_old_event and end_new_event <= end_old_event:
-                                print("Start en einddag lopen in periode van andere reservering")
-                                messages.warning(request, "Start and end dates fall within the period of another reservation")
-                                break
-                            elif start_new_event <= start_old_event and end_new_event >= end_old_event:
-                                print("Start en einddag lopen over een periode van andere reservering")
-                                messages.warning(request, "New event spans across the entire period of another reservation")
-                                break
-                            elif start_new_event <= end_old_event and end_new_event >= start_old_event:
-                                if start_new_event <= end_old_event:
-                                    print("Startdag loopt in periode van andere reservering")
-                                    messages.warning(request, "Start date overlaps with the period of another reservation")
-                                else:
-                                    print("Einddag loopt in periode van andere reservering")
-                                    messages.warning(request, "End date overlaps with the period of another reservation")
-                                
-                            overlap_flag = True
-                            break
-                        else:
-                            print("Geen overlap")
-
-                if overlap_flag==False:
+                checked = check_overlap(new_event)
+                if checked['overlap_flag']==False:
                     new_event.save()
                     calendarid = get_object_or_404(Calendar, userid=userid)
                     new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
                     new_calender_event.save()
-                    messages.success(request, f"Event succesfully added from {start_new_event.date()} till {end_new_event.date()}")
+                    messages.success(request, f"Event succesfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
                     #update calendar_events met nieuw object om mee te geven aan render
                     calendar_events = CalendarEvent.objects.all()
                     #print(new_calender_event)
+                else:
+                    messages.error(request, checked['warning'])
                 return render(request, 'app/event-manager.html', {
                     'calendar_events': calendar_events,
                     'event_types': event_types,
@@ -390,7 +363,7 @@ def item_manager(request):
                 item = get_object_or_404(Item, id=item_id)
                 item.delete()
 
-                messages.success(request, 'User deleted successfully.')
+                messages.success(request, 'Item deleted successfully.')
 
             elif action == 'Create':
                 if not all([item_naam, item_beschrijving]):
