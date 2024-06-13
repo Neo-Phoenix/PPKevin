@@ -11,7 +11,7 @@
         </div>
         <div class="grid gap-4 sm:gap-x-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr]  grid-rows-[auto_1fr]">
             <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">Event Manager</h1>
-            <div class="grid bg-slate-400 rounded-xl gap-4 sm:px-8 sm:pb-8 p-4">
+            <div class="grid bg-slate-400 rounded-xl gap-2 sm:px-8 sm:pb-8 p-4">
                     {% if messages %}
                     <div class="bg-yellow-300 rounded-md p-4 text-slate-600 text-center">
                         {% for message in messages %}
@@ -20,7 +20,9 @@
                     </div>
 
                     {% endif %}
-                    <h2 class="text-xl text-slate-100 font-medium">Create New Event</h2>
+                    <div class="flex place-content-between place-items-center min-h-11">
+                        <h2 class="text-xl text-slate-100 font-medium">Create New Event</h2>
+                    </div>
                     <ul class="grid gap-4">
                         <li class="bg-slate-700 rounded-xl p-4">
                             <form method="post" action="event-manager" id="Create">{% csrf_token %}
@@ -144,8 +146,8 @@
                             <p>No events available</p>
                         {% endif %}
                 </div>
-                <div class="flex bg-slate-400 rounded-xl p-4 sm:px-8 sm:py-4 gap-4 flex-col">
-                    <h2 class="text-xl text-slate-100 font-medium">Navigation</h2>
+                <div class="flex bg-slate-400 rounded-xl p-4 sm:px-8 sm:py-4 gap-2 flex-col">
+                    <h2 class="text-xl text-slate-100 font-medium min-h-11">Navigation</h2>
                     <div class="flex gap-4 flex-col">
                     <a class="grid bg-slate-200 rounded-md place-content-center p-4 text-lg font-medium" href="overview">Go Back</a>
                     </div>

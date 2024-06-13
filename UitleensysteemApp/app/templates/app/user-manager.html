@@ -20,7 +20,9 @@
                     </div>
 
                     {% endif %}
-                    <h2 class="text-xl text-slate-100 font-medium">Create New User</h2>
+                    <div class="flex place-content-between place-items-center min-h-11">
+                        <h2 class="text-xl text-slate-100 font-medium">Create New User</h2>
+                    </div>
                     <ul class="grid gap-4">
                         <li class="bg-slate-700 rounded-xl p-4">
                             <form method="post" action="user-manager" id="Create">{% csrf_token %}
@@ -67,8 +69,8 @@
                             <p>No events available</p>
                         {% endif %}
                 </div>
-                <div class="flex bg-slate-400 rounded-xl p-4 sm:px-8 sm:py-4 gap-4 flex-col">
-                    <h2 class="text-xl text-slate-100 font-medium">Navigation</h2>
+                <div class="flex bg-slate-400 rounded-xl p-4 sm:px-8 sm:py-4 gap-2 flex-col">
+                    <h2 class="text-xl text-slate-100 font-medium min-h-11">Navigation</h2>
                     <div class="flex gap-4 flex-col">
                     <a class="grid bg-slate-200 rounded-md place-content-center p-4 text-lg font-medium" href="overview">Go Back</a>
                     </div>
