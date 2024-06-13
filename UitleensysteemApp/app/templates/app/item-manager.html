@@ -23,41 +23,23 @@
                     <h2 class="text-xl text-slate-100 font-medium">Create New Item</h2>
                     <ul class="grid gap-4">
                         <li class="bg-slate-700 rounded-xl p-4">
-                            <form method="post" action="event-manager" id="Create">{% csrf_token %}
+                            <form method="post" action="item-manager" id="Create">{% csrf_token %}
                                 <div class="grid bg-slate-800 rounded-2xl p-4 gap-2">
-                                    <h3 class="text-white">Create New Item</h3>
-                                    <select class="text-slate-800" name="event_type" >
-                                    {% for eventtype in event_types %}
-                                        {% if eventtype.type == event_type %}
-                                            <option value='{{ eventtype.type }}' selected>{{ eventtype.type }}</option>
-                                            {% else %}
-                                                <option value='{{ eventtype.type }}'>{{ eventtype.type }}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                    </select>
+                                    <h3 class="text-white">New Item</h3>
 
-                                    <select class="text-slate-800" name="item_naam" >
-                                        {% for item in items %}
-                                            {% if item.naam == item_naam %}
-                                                <option value='{{ item.naam }}' selected>{{ item.naam }}</option>
+                                    <input class="text-slate-800" name="item_naam" value="{{item.naam}}" placeholder="Enter item name" required></input>
+                                    <input class="text-slate-800" name="item_beschrijving" value="{{item.beschrijving}}" placeholder="Enter item description" required></input>
+                                    
+                                    <select class="text-slate-800" name="item_type" required>
+                                        <option value="" selected>Select an option</option>
+                                        {% for itemtype in item_types %}
+                                            {% if itemtype.type == item.itemTypeID.type %}
+                                                <option value='{{ item.itemTypeID.type }}' selected>{{ item.itemTypeID.type }}</option>
                                             {% else %}
-                                                <option value='{{ item.naam }}'>{{ item.naam }}</option>
+                                                <option value='{{ itemtype.type }}'>{{ itemtype.type }}</option>
                                             {% endif %}
                                         {% endfor %}
                                     </select>
-
-                                    <select class="text-slate-800" name="user_username">
-                                        {% for user in users %}
-                                            {% if user.username == user_username %}
-                                                <option value='{{ user.username }}' selected>{{ user.username }}</option>
-                                            {% else %}
-                                                <option value='{{ user.username }}'>{{ user.username }}</option>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </select>
-
-                                    <input type="date" name="start_date" value="{{ start_date }}"></input>
-                                    <input type="date" name="end_date" value="{{ end_date }}"></input>
 
                                 </div>
                                 <div class="flex place-content-end gap-4 py-4">
@@ -66,83 +48,45 @@
                             </form>
                         </li>
                         <h2 class="text-xl text-slate-100 font-medium">Edit Items</h2>
-                        {% if calendar_events %}
-                            {% for calendar_event in calendar_events %}
+                        {% if items %}
+                            {% for item in items %}
                                 <li class="bg-slate-700 rounded-xl p-4">
-                                    <form method="post" action="event-manager" id="{{ calendar_event.id }}">{% csrf_token %}
+                                    <form method="post" action="item-manager" id="{{ item.id }}">{% csrf_token %}
                                         <div class="grid bg-slate-800 rounded-2xl p-4 gap-2">
-                                            <h3 class="text-white">{{ calendar_event.eventid }}</h3>
-                                            <select class="text-slate-800" name="event_type" >
-                                            {% for eventtype in event_types %}
-                                                {% if calendar_event.eventid.eventType.type == eventtype.type %}
-                                                    <option value='{{ eventtype.type }}' selected>{{ eventtype.type }}</option>
-                                                {% else %}
-                                                    <option value='{{ eventtype.type }}'>{{ eventtype.type }}</option>
-                                                {% endif %}
-                                            {% endfor %}
-                                            </select>
+                                            <h3 class="text-white">{{ item }}</h3>
 
-                                            <!-- 
-                                            {{calendar_event.eventid.itemid.naam}}
-                                            {% for item in Items %}
-                                                {{item}}
-                                            {% endfor %} -->
-                                            <select class="text-slate-800" name="item_naam" >
-                                                {% for item in items %}
-                                                    {% if calendar_event.eventid.itemid.naam == item.naam %}
-                                                        <option value='{{ item.naam }}' selected>{{ item.naam }}</option>
-                                                    {% else %}
-                                                        <option value='{{ item.naam }}'>{{ item.naam }}</option>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </select>
-
-                                            <select class="text-slate-800" name="user_username">
-                                                {% for user in users %}
-                                                    {% if calendar_event.calendarid.userid.username == user.username %}
-                                                        <option value='{{ user.username }}' selected>{{ user.username }}</option>
-                                                    {% else %}
-                                                        <option value='{{ user.username }}'>{{ user.username }}</option>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </select>
-                                            <!-- {% for eventtype in event_types %}
-                                                <p>{{ eventtype.type }}</p>
-                                                <p>{{ event.eventid.eventType.type }}</p>
-                                            {%endfor%} -->
-                                            <!-- {{ event.eventid.start }} -->
-
-                                            <!-- 
-                                            "| symbol is a pipe for Django Templates, It's used to apply filters to template variables."
-                                            "date" filter wordt gebruikt om date en time objects te filteren
-                                            ":" dubbele punt wordt gebruikt om basically argumenten aan filter date door te geven
-
-                                            "'Y-m-d': This is the format string argument passed to the date filter. It specifies how the date should be formatted.
-                                                Y: Represents the year in four digits (e.g., 2024).
-                                                m: Represents the month in two digits (e.g., 06 for June).
-                                                d: Represents the day in two digits (e.g., 09 for the 9th)."
+                                            <input class="text-slate-800" name="item_naam" value="{{item.naam}}" placeholder="Enter first name" required></input>
+                                            <input class="text-slate-800" name="item_beschrijving" value="{{item.beschrijving}}" placeholder="Enter last name" required></input>
                                             
-                                            -->
-                                            <input type="date" name="start_date" value="{{ calendar_event.eventid.start|date:'Y-m-d' }}"></input>
-                                            <input type="date" name="end_date" value="{{ calendar_event.eventid.end|date:'Y-m-d' }}"></input>
+                                            <select class="text-slate-800" name="item_type" >
+                                                {% for itemtype in item_types %}
+                                                    {% if itemtype.type == item.itemTypeID.type %}
+                                                        <option value='{{ item.itemTypeID.type }}' selected>{{ item.itemTypeID.type }}</option>
+                                                    {% else %}
+                                                        <option value='{{ itemtype.type }}'>{{ itemtype.type }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
 
                                         </div>
                                         <div class="flex place-content-end gap-4 py-4">
-                                            <input type="hidden" name="event_id" value="{{ calendar_event.eventid.id }}">
-                                            <input type="hidden" name="calendar_event_id" value="{{ calendar_event.eventid.id }}">
-                                            <button type="submit" name="action" class="bg-red-200 p-4 rounded-xl sm:min-w-40 text-center" value="Delete" form="{{ calendar_event.id }}">Delete</button>
-                                            <button type="submit" name="action" class="bg-green-200 p-4 rounded-xl sm:min-w-40 text-center" value="Update"form="{{ calendar_event.id }}">Update</button>
+                                            <input type="hidden" name="item_id" value="{{ item.id }}">
+                                            <button type="submit" name="action" class="bg-red-200 p-4 rounded-xl sm:min-w-40 text-center" value="Delete" form="{{ item.id }}">Delete</button>
+                                            <button type="submit" name="action" class="bg-green-200 p-4 rounded-xl sm:min-w-40 text-center" value="Update"form="{{ item.id }}">Update</button>
                                         </div>
                                     </form>
                                 </li>
                             {% endfor %}
                             </ul>
                         {% else %}
-                            <p>No Items available</p>
+                            <p>No items available</p>
                         {% endif %}
                 </div>
-                <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
+                <div class="flex bg-slate-400 rounded-xl p-4 sm:px-8 sm:py-4 gap-4 flex-col">
+                    <h2 class="text-xl text-slate-100 font-medium">Navigation</h2>
+                    <div class="flex gap-4 flex-col">
                     <a class="grid bg-slate-200 rounded-md place-content-center p-4 text-lg font-medium" href="overview">Go Back</a>
+                    </div>
                 </div>
             </div>
         </div>

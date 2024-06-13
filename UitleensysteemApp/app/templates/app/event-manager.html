@@ -25,8 +25,9 @@
                         <li class="bg-slate-700 rounded-xl p-4">
                             <form method="post" action="event-manager" id="Create">{% csrf_token %}
                                 <div class="grid bg-slate-800 rounded-2xl p-4 gap-2">
-                                    <h3 class="text-white">Create New Event</h3>
-                                    <select class="text-slate-800" name="event_type" >
+                                    <h3 class="text-white">New Event</h3>
+                                    <select class="text-slate-800" name="event_type" required>
+                                        <option class="" value="" selected>Select an event type</option>
                                     {% for eventtype in event_types %}
                                         {% if eventtype.type == event_type %}
                                             <option value='{{ eventtype.type }}' selected>{{ eventtype.type }}</option>
@@ -36,7 +37,8 @@
                                     {% endfor %}
                                     </select>
 
-                                    <select class="text-slate-800" name="item_naam" >
+                                    <select class="text-slate-800" name="item_naam" required>
+                                        <option value="" selected>Select an item</option>
                                         {% for item in items %}
                                             {% if item.naam == item_naam %}
                                                 <option value='{{ item.naam }}' selected>{{ item.naam }}</option>
@@ -46,7 +48,8 @@
                                         {% endfor %}
                                     </select>
 
-                                    <select class="text-slate-800" name="user_username">
+                                    <select class="text-slate-800" name="user_username" required>
+                                        <option value="" selected>Select a username</option>
                                         {% for user in users %}
                                             {% if user.username == user_username %}
                                                 <option value='{{ user.username }}' selected>{{ user.username }}</option>

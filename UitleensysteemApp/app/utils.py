@@ -1,5 +1,6 @@
 from datetime import datetime
 import calendar
+import re
 from app.models import *
 import hashlib
 
@@ -82,3 +83,14 @@ def hash_to_rgb(calendar_event: CalendarEvent, mode=None, offset_red=0, offset_g
     print(rgb)
 
     return rgb
+
+def enforce_item_name(item_naam):
+    #converteer naar enforced format
+    #re van regular expressions de .sub() aka substring ervan met regular expression 
+    # '\s' voor alle whitespaces (spaces, tabs, newlines, etc.)
+    # '+' voor alles what erna komt
+    # omzetten naar een enkele -
+    #volgorde: itemnaam als string -> kleine letters -> alle opeenvolgende whitespaces vervangen met '-'
+    item_naam = re.sub(r'\s+', '-',str(item_naam).lower())
+    print(item_naam)
+    return item_naam
