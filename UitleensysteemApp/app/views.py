@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from app.models import *
 from datetime import datetime
 from app.utils import *
+import copy
 
 # Create your views here.
 
@@ -65,7 +66,7 @@ def overview(request):
         else:
             event_days_as_set = {}
 
-        rgb = hash_to_rgb(calendar_event, "dark", 75, 28, 82)
+        rgb = hash_to_rgb(calendar_event, "dark", 34, 21, 45)
         #calender_event is de key dat als object wordt meegegeven
         calendar_event_dictionary[calendar_event] = {'event_days_as_set': event_days_as_set, 'rgb': rgb}
 
@@ -87,7 +88,7 @@ def event_manager(request):
         users = User.objects.all()
         calendar_events = CalendarEvent.objects.all()
         event_types = EventType.objects.all()
-        print(calendar_events)
+        #print(calendar_events)
         # event CRUD handling
         if request.method == "POST":
             event_id = request.POST.get('event_id')
@@ -110,20 +111,29 @@ def event_manager(request):
                 
             elif action == "Update":
                 event = get_object_or_404(Event, id=event_id)
+                event_temp = copy.deepcopy(event)
+
                 calendar_event = get_object_or_404(CalendarEvent, eventid=event_id)
                 #print(f"Event: {event}, Event ID: {event_id}, Action: {action}, event_type: {event_type}, Start Date: {start_date}, End Date: {end_date}")                
                 event.start = start_date
                 event.end = end_date
                 event.itemid = get_object_or_404(Item, naam=item_naam)
                 # Check eventtype object of object ook echt bestaat met de gegeven event_type
-                event.eventType = get_object_or_404(EventType, type=event_type)    
-                event.save()
+                event.eventType = get_object_or_404(EventType, type=event_type)
 
-                
-                calendar_event.calendarid = get_object_or_404(Calendar, userid=userid)
-                calendar_event.save()
+                # Default checked Django models.Model implementatie dus de ids van de object, 
+                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
+                if (event.__str__ == event_temp.__str__):
+                    print("1", event, "and", event_temp)
+                    messages.warning(request, "No changes detected from the updated event") 
+                else:
+                    #print("2", event, event_temp)
+                    event.save()
+                    
+                    calendar_event.calendarid = get_object_or_404(Calendar, userid=userid)
+                    calendar_event.save()
 
-                messages.success(request, 'Event updated successfully.')
+                    messages.success(request, 'Event updated successfully.')
 
             elif action == 'Delete':
                 # Delete the event
@@ -151,18 +161,16 @@ def event_manager(request):
                         start_old_event = datetime.strptime(str(calendar_event1.eventid.start), "%Y-%m-%d")
                         end_old_event = datetime.strptime(str(calendar_event1.eventid.end), "%Y-%m-%d")
 
-                        print(start_new_event.day, end_new_event.day, "and", start_old_event.day, end_old_event.day)
+                        #print(start_new_event.day, end_new_event.day, "and", start_old_event.day, end_old_event.day)
 
                         if start_new_event <= end_old_event and end_new_event >= start_old_event:
                             if start_new_event >= start_old_event and end_new_event <= end_old_event:
                                 print("Start en einddag lopen in periode van andere reservering")
                                 messages.warning(request, "Start and end dates fall within the period of another reservation")
-                                overlap_flag = True
                                 break
                             elif start_new_event <= start_old_event and end_new_event >= end_old_event:
                                 print("Start en einddag lopen over een periode van andere reservering")
                                 messages.warning(request, "New event spans across the entire period of another reservation")
-                                overlap_flag = True
                                 break
                             elif start_new_event <= end_old_event and end_new_event >= start_old_event:
                                 if start_new_event <= end_old_event:
@@ -172,8 +180,8 @@ def event_manager(request):
                                     print("Einddag loopt in periode van andere reservering")
                                     messages.warning(request, "End date overlaps with the period of another reservation")
                                 
-                                overlap_flag = True
-                                break
+                            overlap_flag = True
+                            break
                         else:
                             print("Geen overlap")
 
@@ -182,7 +190,7 @@ def event_manager(request):
                     calendarid = get_object_or_404(Calendar, userid=userid)
                     new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
                     new_calender_event.save()
-
+                    messages.success(request, f"Event succesfully added from {start_new_event.date()} till {end_new_event.date()}")
                     #update calendar_events met nieuw object om mee te geven aan render
                     calendar_events = CalendarEvent.objects.all()
                     #print(new_calender_event)
@@ -210,6 +218,11 @@ def event_manager(request):
     else:
         return render(request, 'app/event-manager.html')
 
+def user_manager(request):
+    return render(request, 'app/user-manager.html')
+
+def item_manager(request):
+    return render(request, 'app/item-manager.html')
 
 def login(request):
     username = request.POST.get("username")

@@ -11,7 +11,7 @@
             </div>
             <div class="grid gap-4 sm:gap-x-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr]  grid-rows-[auto_1fr]">
                 <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">Welcome</h1>
-                <div class="flex bg-slate-400 rounded-xl flex-col px-8 py-4">
+                <div class="flex bg-slate-400 rounded-xl flex-col px-8 py-4 gap-4">
                     <h2 class="text-xl text-slate-100 font-medium">
                         {% if chosen_month_to_text %}
                             All events for: {{chosen_month_to_text}}, 
@@ -73,9 +73,15 @@
 
                     </div>
                 </div>
-                <div class="bg-slate-400 rounded-xl p-4 sm:p-8">
-                    <a class="grid bg-slate-200 rounded-md place-content-center p-4 text-lg font-medium" href="event-manager">Manage Events</a>
+                <div class="flex bg-slate-400 rounded-xl p-4 sm:px-8 sm:py-4 gap-4 flex-col">
+                    <h2 class="text-xl text-slate-100 font-medium">Navigation</h2>
+                    <div class="flex gap-4 flex-col">
+                        <a class="grid bg-slate-200 rounded-md place-content-center p-4 text-lg font-medium" href="event-manager">Manage Events</a>
+                        <a class="grid bg-slate-200 rounded-md place-content-center p-4 text-lg font-medium" href="user-manager">Manage Users</a>
+                        <a class="grid bg-slate-200 rounded-md place-content-center p-4 text-lg font-medium" href="item-manager">Manage Items</a>
+                    </div>
                 </div>
+
             </div>
         </div>
     {% else %}

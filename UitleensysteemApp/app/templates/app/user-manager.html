@@ -1,17 +1,17 @@
 {% extends "app/base.html" %}
 
-{% block title%} EhB ESA | Event Manager {% endblock %}
+{% block title%} EhB ESA | User Manager {% endblock %}
 
 {% block body %}
     {% if request.user.is_authenticated %}
     <div class="grid grid-rows-[auto_1fr] gap-4 min-h-screen p-4 sm:mx-16">
         <div class="grid items-center bg-gray-200 rounded-2xl mt-8 px-4 py-4 sm:px-8 sm:py-4 grid-cols-[1fr_auto]">
-            <h1 class="font-bold text-2xl text-slate-600">Events</h1>
+            <h1 class="font-bold text-2xl text-slate-600">Users</h1>
             <a class="bg-slate-600 px-4 py-2 sm:py-4 rounded-2xl text-center text-slate-400 font-medium" href="logout_view">logout</a>
         </div>
         <div class="grid gap-4 sm:gap-x-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr]  grid-rows-[auto_1fr]">
-            <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">Event Manager</h1>
-            <div class="grid bg-slate-400 rounded-xl gap-4 sm:px-8 sm:pb-8 p-4">
+            <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">User Manager</h1>
+            <div class="grid bg-slate-400 rounded-xl gap-2 sm:px-8 sm:pb-8 p-4">
                     {% if messages %}
                     <div class="bg-yellow-300 rounded-md p-4 text-slate-600 text-center">
                         {% for message in messages %}
@@ -20,7 +20,7 @@
                     </div>
 
                     {% endif %}
-                    <h2 class="text-xl text-slate-100 font-medium">Create New Event</h2>
+                    <h2 class="text-xl text-slate-100 font-medium">Create New User</h2>
                     <ul class="grid gap-4">
                         <li class="bg-slate-700 rounded-xl p-4">
                             <form method="post" action="event-manager" id="Create">{% csrf_token %}
@@ -65,7 +65,7 @@
                                 </div>
                             </form>
                         </li>
-                        <h2 class="text-xl text-slate-100 font-medium">Edit Events</h2>
+                        <h2 class="text-xl text-slate-100 font-medium">Edit Users</h2>
                         {% if calendar_events %}
                             {% for calendar_event in calendar_events %}
                                 <li class="bg-slate-700 rounded-xl p-4">
