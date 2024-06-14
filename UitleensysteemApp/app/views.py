@@ -33,7 +33,14 @@ def overview(request):
         chosen_year = timeDateTime.year
         chosen_month_and_year = {'month': chosen_month, 'year': chosen_year}
 
-    all_calendar_events = CalendarEvent.objects.all()
+    if request.user.is_staff:
+        all_calendar_events = CalendarEvent.objects.all()
+        print("user is staff")
+    else:
+        print(request.user)
+        user = get_object_or_404(User, username=request.user)
+        calendar = get_object_or_404(Calendar, userid=user)
+        all_calendar_events = CalendarEvent.objects.filter(calendarid=calendar)
 
     #chosen_month_and_year in this format {'month': 6, 'year': 2024}
     processed_calendar = process_calendar(chosen_month_and_year)
