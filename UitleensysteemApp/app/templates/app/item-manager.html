@@ -85,11 +85,14 @@
                         {% else %}
                             <p>No items available</p>
                         {% endif %}
-                    {% endif %}
-                    <div>
+
+                    {% else %}         
+                   <div>
                         <h1 class="font-bold text-2xl text-red-900 pb-4"> Unauthorized Access: </h1>
                         <h2 class="font-semibold text-red-900">Only staff members are able to use the item manager. </h2>
                     </div>
+                {% endif %}
+
                 </div>
 
                 <div class="flex bg-slate-400 rounded-xl p-4 sm:px-8 sm:py-4 gap-2 flex-col">

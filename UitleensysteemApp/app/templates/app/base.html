@@ -1,13 +1,15 @@
 {% load static tailwind_tags %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} {% endblock %}</title>
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
     {% tailwind_css %}
 </head>
-<body class="min-h-screen bg-gradient-to-b from-slate-950 to-blue-900">
+<body class="min-h-screen bg-gradient-to-b {% if request.user.is_staff %}from-slate-950{% else%}from-slate-950 {% endif %} {% if request.user.is_staff %}to-red-900{% else%}to-blue-900 {% endif %}">
     
         {% block body %} 
 

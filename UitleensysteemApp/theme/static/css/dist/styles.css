@@ -1024,6 +1024,10 @@ select {
   --tw-gradient-to: #1e3a8a var(--tw-gradient-to-position);
 }
 
+.to-red-900 {
+  --tw-gradient-to: #7f1d1d var(--tw-gradient-to-position);
+}
+
 .p-2 {
   padding: 0.5rem;
 }
