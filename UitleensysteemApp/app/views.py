@@ -220,6 +220,8 @@ def user_manager(request):
             user_first_name = request.POST.get('user_first_name')
             user_last_name = request.POST.get('user_last_name')
             user_password = request.POST.get('user_password')
+            user_staffmember_status = request.POST.get('user_staffmember_status')
+            old_user_staff_status = request.POST.get('old_user_staff_status')
             user_password_check = request.POST.get('user_password_check')
             user_email = user_username
 
@@ -227,8 +229,6 @@ def user_manager(request):
             if action == "Update":
                 user = get_object_or_404(User, id=user_id)
                 user_temp = copy.deepcopy(user)
-
-                print(user_username)
 
                 try:
                     validate_email(user_username)
@@ -246,14 +246,40 @@ def user_manager(request):
                 user.first_name = user_first_name
                 user.last_name = user_last_name
                 user.email = user_email
-                if user_password:
-                    user.set_password(user_password)
+
+                # Verifieer eerst of het eigen account is en zijn eigen staffmember status aanpast, geef warning en return render()
+                if user_id == str(request.user.id):
+                    if user_staffmember_status != None or str(user.is_staff) != old_user_staff_status:
+                        if str(user.is_staff) != user_staffmember_status: 
+
+                            messages.warning(request, 'Changing own userstaff status is prohibited.')
+                            return render(request, 'app/user-manager.html', {
+                                'user_username': user_username,
+                                'user_first_name': user_first_name,
+                                'user_last_name': user_last_name,
+                                'user_email' : user_email,
+                                'users': users
+                            })
+                        pass
+                else:
+                    if user_staffmember_status == "on":
+                        user.is_staff = True
+                    else:
+                        user.is_staff = False
+                    if user_password:
+                        user.set_password(user_password)
 
                 # Default checked Django models.Model implementatie dus de ids van de object, 
                 # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
-                if (user.__str__ == user_temp.__str__):
-                    print("1", user, "and", user_temp)
-                    messages.warning(request, "No changes detected from the updated event") 
+                #print(user_temp == user)
+                if (user_temp == user 
+                    and user_staffmember_status == old_user_staff_status
+                    and user_first_name == user.first_name
+                    and user_last_name == user.last_name
+                    and user_password == user.password
+                    ):
+                    #print("1", user, "and", user_temp)
+                    messages.warning(request, "No changes detected from the updated user") 
                 else:
                     #print("2", event, event_temp)
                     user.save()
@@ -261,10 +287,20 @@ def user_manager(request):
                     messages.success(request, 'User updated successfully.')
 
             elif action == 'Delete':
-                # Delete the event
-                user = get_object_or_404(User, id=user_id)
-                user.delete()
+                # Verifieer eerst of er geen selfsabotage is
+                if (user_id == str(request.user.id)):
+                    messages.warning(request, "Can't delete your own account.")
+                    return render(request, 'app/user-manager.html', {
+                        'user_username': user_username,
+                        'user_first_name': user_first_name,
+                        'user_last_name': user_last_name,
+                        'user_email' : user_email,
+                        'users': users,
+                    })
+                # Delete the user
+                #user.delete()
 
+                print(request.user.id, user_id)
                 messages.success(request, 'User deleted successfully.')
 
             elif action == 'Create':
@@ -276,7 +312,6 @@ def user_manager(request):
                         'user_last_name': user_last_name,
                         'user_email' : user_email,
                         'users': users,
-
                     })
                         
                 #Email validatie met Django email validator
