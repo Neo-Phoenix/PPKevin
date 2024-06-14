@@ -79,7 +79,7 @@ def hash_to_rgb(calendar_event: CalendarEvent, mode=None, offset_red=0, offset_g
         g = (rgb*2+offset_green) % 64
         b = (rgb*3+offset_blue) % 64
     else:
-        raise TypeError(f"hash_to_rgb() verwacht een 2de parameter mode met ofwel \"bright\" of  \"dark\"")
+        raise TypeError(f"hash_to_rgb() verwacht een 2de parameter mode met ofwel 'bright', 'dark' of 'very dark'")
     rgb = {'r': r, 'g': g, 'b': b}
     print(rgb)
 

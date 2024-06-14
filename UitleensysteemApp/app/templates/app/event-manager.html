@@ -134,7 +134,7 @@
                                         </div>
                                         <div class="flex place-content-end gap-4 py-4">
                                             <input type="hidden" name="event_id" value="{{ calendar_event.eventid.id }}">
-                                            <input type="hidden" name="calendar_event_id" value="{{ calendar_event.eventid.id }}">
+                                            <input type="hidden" name="calendar_event_id" value="{{ calendar_event.id }}">
                                             <button type="submit" name="action" class="bg-red-200 p-4 rounded-xl sm:min-w-40 text-center" value="Delete" form="{{ calendar_event.id }}">Delete</button>
                                             <button type="submit" name="action" class="bg-green-200 p-4 rounded-xl sm:min-w-40 text-center" value="Update"form="{{ calendar_event.id }}">Update</button>
                                         </div>

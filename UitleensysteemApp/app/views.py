@@ -99,9 +99,9 @@ def event_manager(request):
 
         #skip admin rendering
         admin = get_object_or_404(User, username="Admin")
-        adminCalendar = get_object_or_404(Calendar, userid=admin)
+        admin_calendar = get_object_or_404(Calendar, userid=admin)
         users = User.objects.exclude(username='Admin')
-        calendar_events = CalendarEvent.objects.exclude(calendarid=adminCalendar)
+        calendar_events = CalendarEvent.objects.exclude(calendarid=admin_calendar)
 
         event_types = EventType.objects.all()
         #print(calendar_events)
@@ -109,6 +109,8 @@ def event_manager(request):
         if request.method == "POST":
             event_id = request.POST.get('event_id')
             calendar_event_id = request.POST.get('calendar_event_id')
+            #print(calendar_event_id)
+
             action = request.POST.get('action')
             
             #todo: check eerst of data niet leeg is en geldig is met database opties
@@ -129,9 +131,11 @@ def event_manager(request):
                 event = get_object_or_404(Event, id=event_id)
                 event_temp = copy.deepcopy(event)
 
-                user = get_object_or_404(User, username=user_username)
-                userCalender = get_object_or_404(Calendar, userid=user)
-                calendar_event = get_object_or_404(CalendarEvent, eventid=event_id, calendarid=userCalender)
+                calendarid = get_object_or_404(Calendar, userid=userid)
+                #print(calendar_event_id)
+                #print(CalendarEvent.objects.filter(id=calendar_event_id).exists())
+                calendar_event = get_object_or_404(CalendarEvent, id=calendar_event_id)
+                calendar_event_temp = copy.deepcopy(calendar_event)
                 #print(f"Event: {event}, Event ID: {event_id}, Action: {action}, event_type: {event_type}, Start Date: {start_date}, End Date: {end_date}")                
                 event.start = start_date
                 event.end = end_date
@@ -141,7 +145,11 @@ def event_manager(request):
 
                 # Default checked Django models.Model implementatie dus de ids van de object, 
                 # maar ik vergelijk de string representatie van de class die dus een stringrepresentatie bevat van de inhoud 
-                if (str(event) == str(event_temp)):
+                user = get_object_or_404(User, username=user_username)
+                userCalendar = get_object_or_404(Calendar, userid=user)
+                calendar_event.calendarid = userCalendar
+                print(str(event) == str(event_temp), str(calendar_event) == str(calendar_event_temp))
+                if (str(event) == str(event_temp) and str(calendar_event) == str(calendar_event_temp)):
                     print("1", event, "and", event_temp)
                     messages.warning(request, "No changes detected from the updated event") 
                 else:
@@ -149,9 +157,14 @@ def event_manager(request):
                     checked = check_overlap(event)
                     if checked['overlap_flag']==False:
                         event.save()
-                        
-                        calendar_event.calendarid = get_object_or_404(Calendar, userid=userid)
+
                         calendar_event.save()
+
+                        admin = get_object_or_404(User, username="Admin")
+                        admin_calendar = get_object_or_404(Calendar, userid=admin)
+                        admin_calendar_event = get_object_or_404(CalendarEvent, eventid=event_id, calendarid=admin_calendar)
+
+                        admin_calendar_event.save()
 
                         messages.success(request, 'Event updated successfully.')
                     else:
@@ -181,16 +194,16 @@ def event_manager(request):
                     new_calender_event.save()
 
                     admin = get_object_or_404(User, username="Admin")
-                    adminCalendar = get_object_or_404(Calendar, userid=admin)
-                    if not CalendarEvent.objects.filter(calendarid=adminCalendar, eventid=new_event).exists():
+                    admin_calendar = get_object_or_404(Calendar, userid=admin)
+                    if not CalendarEvent.objects.filter(calendarid=admin_calendar, eventid=new_event).exists():
                         print("ook aan admin kalender toegevoegd")
 
-                        new_calender_event = CalendarEvent(calendarid=adminCalendar, eventid=new_event)
+                        new_calender_event = CalendarEvent(calendarid=admin_calendar, eventid=new_event)
                         new_calender_event.save()
 
-                    messages.success(request, f"Event succesfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
+                    messages.success(request, f"Event successfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
                     #update calendar_events met nieuw object om mee te geven aan render
-                    calendar_events = CalendarEvent.objects.exclude(calendarid=adminCalendar)
+                    calendar_events = CalendarEvent.objects.exclude(calendarid=admin_calendar)
                     #print(new_calender_event)
                 else:
                     messages.error(request, checked['warning'])
@@ -200,14 +213,12 @@ def event_manager(request):
                     'items': items,
                     'users': users,
                     "event_id": event_id, 
-                    "calendar_event_id": calendar_event_id, 
                     "event_type": event_type, 
                     "item_naam": item_naam, 
                     "user_username": user_username, 
                     "start_date": start_date, 
                     "end_date": end_date
                     })
-
         #Geef data door aan event manager view
         return render(request, 'app/event-manager.html', {
             'calendar_events': calendar_events,
@@ -315,7 +326,7 @@ def user_manager(request):
 
                     calendar = Calendar(userid=user, description=user.username)
                     calendar.save()
-                    messages.success(request, "Succesfully added user")
+                    messages.success(request, "successfully added user")
                 else:
                     messages.warning(request, "Password doesn't match.")
                     return render(request, 'app/user-manager.html', {
@@ -409,7 +420,7 @@ def item_manager(request):
                 if not Item.objects.filter(naam=enforced_item_name).exists():
                     new_item = Item(naam=enforced_item_name, beschrijving=item_beschrijving, itemTypeID=item_itemTypeID)
                     new_item.save()
-                    messages.success(request, "Succesfully added item")
+                    messages.success(request, "successfully added item")
                 else:
                     messages.error(request, f"Item already exists when parsing your item name in our enforced format, resulting in: \"{enforced_item_name}\"")
 
@@ -472,7 +483,7 @@ def register(request):
         user = get_object_or_404(User, username=email)
         calendar = Calendar(userid=user, description=user.username)
         calendar.save()
-        messages.success(request, "Succesfully registered, please login.")
+        messages.success(request, "successfully registered, please login.")
         return render(request, 'app/signin.html', {'firstname': firstname, 'lastname': lastname, 'email': email})
     else:
         messages.warning(request, "Password doesn't match.")
