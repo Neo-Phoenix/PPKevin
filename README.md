@@ -19,7 +19,7 @@ Dit is een klein Django webapplicatie project dat een beheer/uitleen systeem voo
 
 ## Installatie:
 1. Installeer de laatste versie van Python 3
-2. Installeer Django 5.0.4
+2. Installeer Django met pip
    Linux / macOS:
       python -m pip install Django==5.0.4
 

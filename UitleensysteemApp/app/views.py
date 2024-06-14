@@ -271,9 +271,10 @@ def user_manager(request):
                     user.is_staff = True
                 else:
                     user.is_staff = False
-            if user_password == user_password_check:
+            if user_password:
+                print(user_password, user_password_check)
                 user.set_password(user_password)
-            else:
+            elif user_password != user_password_check:
                 messages.warning(request, "Updated passwords don't match.")
                 return render(request, 'app/user-manager.html', {
                     'user_username': user_username,
@@ -312,7 +313,7 @@ def user_manager(request):
                     'users': users,
                 })
             # Delete the user
-            #user.delete()
+            user.delete()
 
             print(request.user.id, user_id)
             messages.success(request, 'User deleted successfully.')
@@ -405,7 +406,7 @@ def item_manager(request):
                 item = get_object_or_404(Item, id=item_id)
                 item_temp = copy.deepcopy(item)
 
-                print(item_naam)
+                #print(item_naam)
                 enforced_item_name = enforce_item_name(item_naam)
 
                 item.naam = enforced_item_name
@@ -415,7 +416,7 @@ def item_manager(request):
                 # Default checked Django models.Model implementatie dus de ids van de object, 
                 # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
                 if (item.__str__ == item_temp.__str__):
-                    print("1", item, "and", item_temp)
+                    #print("1", item, "and", item_temp)
                     messages.warning(request, "No changes detected from the updated event") 
                 else:
                     #print("2", event, event_temp)
