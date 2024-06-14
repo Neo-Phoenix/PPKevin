@@ -33,7 +33,14 @@ def overview(request):
         chosen_year = timeDateTime.year
         chosen_month_and_year = {'month': chosen_month, 'year': chosen_year}
 
-    all_calendar_events = CalendarEvent.objects.all()
+    if request.user.is_staff:
+        all_calendar_events = CalendarEvent.objects.all()
+        print("user is staff")
+    else:
+        print(request.user)
+        user = get_object_or_404(User, username=request.user)
+        calendar = get_object_or_404(Calendar, userid=user)
+        all_calendar_events = CalendarEvent.objects.filter(calendarid=calendar)
 
     #chosen_month_and_year in this format {'month': 6, 'year': 2024}
     processed_calendar = process_calendar(chosen_month_and_year)
@@ -47,13 +54,7 @@ def overview(request):
 
     #deze code block zal een {<calenderEventobject instance1>, {2,3,4,5}}
     calendar_event_dictionary = {}
-            
     for calendar_event in all_calendar_events:
-        #check of het admin is en skip rendering
-        if calendar_event.calendarid.userid.username == "Admin":
-            continue
-
-
         #strptime vraagt string aan, geen object daarom str() dan .month om enkel de converted maand over te houden
         start_date_time_object_of_calendar_event = datetime.strptime(str(calendar_event.eventid.start), "%Y-%m-%d")
         end_date_time_object_of_calendar_event = datetime.strptime(str(calendar_event.eventid.end), "%Y-%m-%d")
@@ -96,13 +97,8 @@ def event_manager(request):
     if request.user.is_authenticated:
         #alle objecten van model van models.py
         items = Item.objects.all()
-
-        #skip admin rendering
-        admin = get_object_or_404(User, username="Admin")
-        adminCalendar = get_object_or_404(Calendar, userid=admin)
-        users = User.objects.exclude(username='Admin')
-        calendar_events = CalendarEvent.objects.exclude(calendarid=adminCalendar)
-
+        users = User.objects.all()
+        calendar_events = CalendarEvent.objects.all()
         event_types = EventType.objects.all()
         #print(calendar_events)
         # event CRUD handling
@@ -129,9 +125,7 @@ def event_manager(request):
                 event = get_object_or_404(Event, id=event_id)
                 event_temp = copy.deepcopy(event)
 
-                user = get_object_or_404(User, username=user_username)
-                userCalender = get_object_or_404(Calendar, userid=user)
-                calendar_event = get_object_or_404(CalendarEvent, eventid=event_id, calendarid=userCalender)
+                calendar_event = get_object_or_404(CalendarEvent, eventid=event_id)
                 #print(f"Event: {event}, Event ID: {event_id}, Action: {action}, event_type: {event_type}, Start Date: {start_date}, End Date: {end_date}")                
                 event.start = start_date
                 event.end = end_date
@@ -140,12 +134,12 @@ def event_manager(request):
                 event.eventType = get_object_or_404(EventType, type=event_type)
 
                 # Default checked Django models.Model implementatie dus de ids van de object, 
-                # maar ik vergelijk de string representatie van de class die dus een stringrepresentatie bevat van de inhoud 
-                if (str(event) == str(event_temp)):
+                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
+                if (event.__str__ == event_temp.__str__):
                     print("1", event, "and", event_temp)
                     messages.warning(request, "No changes detected from the updated event") 
                 else:
-                    print("2", str(event), str(event_temp))
+                    #print("2", event, event_temp)
                     checked = check_overlap(event)
                     if checked['overlap_flag']==False:
                         event.save()
@@ -179,18 +173,9 @@ def event_manager(request):
                     calendarid = get_object_or_404(Calendar, userid=userid)
                     new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
                     new_calender_event.save()
-
-                    admin = get_object_or_404(User, username="Admin")
-                    adminCalendar = get_object_or_404(Calendar, userid=admin)
-                    if not CalendarEvent.objects.filter(calendarid=adminCalendar, eventid=new_event).exists():
-                        print("ook aan admin kalender toegevoegd")
-
-                        new_calender_event = CalendarEvent(calendarid=adminCalendar, eventid=new_event)
-                        new_calender_event.save()
-
-                    messages.success(request, f"Event succesfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
+                    messages.success(request, f"Event Successfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
                     #update calendar_events met nieuw object om mee te geven aan render
-                    calendar_events = CalendarEvent.objects.exclude(calendarid=adminCalendar)
+                    calendar_events = CalendarEvent.objects.all()
                     #print(new_calender_event)
                 else:
                     messages.error(request, checked['warning'])
@@ -222,7 +207,7 @@ def user_manager(request):
     #check of user is ingelogd
     if request.user.is_authenticated:
         #alle objecten van model van models.py
-        users = User.objects.exclude(username='Admin')
+        users = User.objects.all()
 
         #print(calendar_events)
         # event CRUD handling
@@ -265,8 +250,8 @@ def user_manager(request):
                     user.set_password(user_password)
 
                 # Default checked Django models.Model implementatie dus de ids van de object, 
-                # maar ik vergelijk de string representatie van de class die dus een stringrepresentatie bevat van de inhoud 
-                if (str(user) == str(user_temp)):
+                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
+                if (user.__str__ == user_temp.__str__):
                     print("1", user, "and", user_temp)
                     messages.warning(request, "No changes detected from the updated event") 
                 else:
@@ -315,7 +300,7 @@ def user_manager(request):
 
                     calendar = Calendar(userid=user, description=user.username)
                     calendar.save()
-                    messages.success(request, "Succesfully added user")
+                    messages.success(request, "Successfully added user")
                 else:
                     messages.warning(request, "Password doesn't match.")
                     return render(request, 'app/user-manager.html', {
@@ -348,8 +333,13 @@ def item_manager(request):
     #check of user is ingelogd
     if request.user.is_authenticated:
 
+        if request.user.is_staff:
+            items = Item.objects.all()
+            print("user is staff")
+        else:
+            return render(request, 'app/item-manager.html')
+
         #alle objecten van model van models.py
-        items = Item.objects.all()
         item_types = ItemType.objects.all()
 
         #print(calendar_events)
@@ -375,8 +365,8 @@ def item_manager(request):
                 item.itemTypeID = get_object_or_404(ItemType, type=item_type)
 
                 # Default checked Django models.Model implementatie dus de ids van de object, 
-                # maar ik vergelijk de string representatie van de class die dus een stringrepresentatie bevat van de inhoud 
-                if (str(item) == str(item_temp)):
+                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
+                if (item.__str__ == item_temp.__str__):
                     print("1", item, "and", item_temp)
                     messages.warning(request, "No changes detected from the updated event") 
                 else:
@@ -409,7 +399,7 @@ def item_manager(request):
                 if not Item.objects.filter(naam=enforced_item_name).exists():
                     new_item = Item(naam=enforced_item_name, beschrijving=item_beschrijving, itemTypeID=item_itemTypeID)
                     new_item.save()
-                    messages.success(request, "Succesfully added item")
+                    messages.success(request, "Successfully added item")
                 else:
                     messages.error(request, f"Item already exists when parsing your item name in our enforced format, resulting in: \"{enforced_item_name}\"")
 
@@ -472,7 +462,7 @@ def register(request):
         user = get_object_or_404(User, username=email)
         calendar = Calendar(userid=user, description=user.username)
         calendar.save()
-        messages.success(request, "Succesfully registered, please login.")
+        messages.success(request, "Successfully registered, please login.")
         return render(request, 'app/signin.html', {'firstname': firstname, 'lastname': lastname, 'email': email})
     else:
         messages.warning(request, "Password doesn't match.")
