@@ -333,8 +333,13 @@ def item_manager(request):
     #check of user is ingelogd
     if request.user.is_authenticated:
 
+        if request.user.is_staff:
+            items = Item.objects.all()
+            print("user is staff")
+        else:
+            return render(request, 'app/item-manager.html')
+
         #alle objecten van model van models.py
-        items = Item.objects.all()
         item_types = ItemType.objects.all()
 
         #print(calendar_events)
