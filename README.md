@@ -25,7 +25,7 @@ Dit is een klein Django webapplicatie project dat een beheer/uitleen systeem voo
 
    Windows:
       python -m pip install Django==5.0.4
-      
+
 3. Installeer Django tailwind (css framework)
 pip install django-tailwind
 
@@ -33,7 +33,7 @@ pip install django-tailwind
 pip install django-browser-reload
 
 5. Clone de repository met git clone naar target folder
-      https://github.com/Neo-Phoenix/PPKevin
+git clone https://github.com/Neo-Phoenix/PPKevin.git
 
 6. Run Django app in terminal
 python .\PPKevin\UitleensysteemApp\manage.py runserver
