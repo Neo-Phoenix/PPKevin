@@ -272,7 +272,12 @@ def user_manager(request):
                 # Default checked Django models.Model implementatie dus de ids van de object, 
                 # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
                 #print(user_temp == user)
-                if (user_temp == user):
+                if (user_temp == user 
+                    and user_staffmember_status == old_user_staff_status
+                    and user_first_name == user.first_name
+                    and user_last_name == user.last_name
+                    and user_password == user.password
+                    ):
                     #print("1", user, "and", user_temp)
                     messages.warning(request, "No changes detected from the updated user") 
                 else:
