@@ -832,6 +832,14 @@ select {
   min-height: 100vh;
 }
 
+.w-7 {
+  width: 1.75rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
@@ -846,6 +854,10 @@ select {
 
 .grid-rows-\[auto_1fr\] {
   grid-template-rows: auto 1fr;
+}
+
+.flex-row {
+  flex-direction: row;
 }
 
 .flex-col {
