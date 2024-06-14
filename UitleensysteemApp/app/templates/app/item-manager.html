@@ -12,6 +12,8 @@
         <div class="grid gap-4 sm:gap-x-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr]  grid-rows-[auto_1fr]">
             <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">Item Manager</h1>
             <div class="grid bg-slate-400 rounded-xl gap-2 sm:px-8 sm:pb-8 p-4">
+            {% if request.user.is_staff %}
+
                     {% if messages %}
                     <div class="bg-yellow-300 rounded-md p-4 text-slate-600 text-center">
                         {% for message in messages %}
@@ -83,7 +85,13 @@
                         {% else %}
                             <p>No items available</p>
                         {% endif %}
+                    {% endif %}
+                    <div>
+                        <h1 class="font-bold text-2xl text-red-900 pb-4"> Unauthorized Access: </h1>
+                        <h2 class="font-semibold text-red-900">Only staff members are able to use the item manager. </h2>
+                    </div>
                 </div>
+
                 <div class="flex bg-slate-400 rounded-xl p-4 sm:px-8 sm:py-4 gap-2 flex-col">
                     <h2 class="text-xl text-slate-100 font-medium min-h-11">Navigation</h2>
                     <div class="flex gap-4 flex-col">
