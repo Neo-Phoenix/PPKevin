@@ -22,6 +22,8 @@ def signup(request):
     return render(request, 'app/signup.html')
 
 def overview(request):
+    if not request.user.is_authenticated:
+        return render(request, 'app/overview.html')
     now=datetime.now()
     time = now.strftime("%Y-%m")
     chosen_month_and_year = ""
@@ -94,270 +96,244 @@ def overview(request):
 
 def event_manager(request):
     #check of user is ingelogd
-    if request.user.is_authenticated:
-        #alle objecten van model van models.py
-        items = Item.objects.all()
-        users = User.objects.all()
-        calendar_events = CalendarEvent.objects.all()
-        event_types = EventType.objects.all()
-        #print(calendar_events)
-        # event CRUD handling
-        if request.method == "POST":
-            event_id = request.POST.get('event_id')
-            calendar_event_id = request.POST.get('calendar_event_id')
-            action = request.POST.get('action')
-            
-            #todo: check eerst of data niet leeg is en geldig is met database opties
-            event_type = request.POST.get('event_type')
-            item_naam = request.POST.get('item_naam')
-            user_username = request.POST.get('user_username')
-            start_date = request.POST.get('start_date')
-            end_date = request.POST.get('end_date')
+    if not request.user.is_authenticated:
+        return render(request, 'app/event-manager.html')
         
-            userid = get_object_or_404(User, username=user_username)
+    #alle objecten van model van models.py
+    items = Item.objects.all()
+    users = User.objects.all()
+    calendar_events = CalendarEvent.objects.all()
+    event_types = EventType.objects.all()
+    #print(calendar_events)
+    # event CRUD handling
+    if request.method == "POST":
+        event_id = request.POST.get('event_id')
+        calendar_event_id = request.POST.get('calendar_event_id')
+        action = request.POST.get('action')
+        
+        #todo: check eerst of data niet leeg is en geldig is met database opties
+        event_type = request.POST.get('event_type')
+        item_naam = request.POST.get('item_naam')
+        user_username = request.POST.get('user_username')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+    
+        userid = get_object_or_404(User, username=user_username)
+        
+        #print(f"{event.id} en {event_id} en {action}")
+        #check of end_date niet voor start_date komt
+        if start_date>=end_date:
+            messages.warning(request, f"Dates are incorrect: {end_date} is before {start_date}") 
             
-            #print(f"{event.id} en {event_id} en {action}")
-            #check of end_date niet voor start_date komt
-            if start_date>=end_date:
-                messages.warning(request, f"Dates are incorrect: {end_date} is before {start_date}") 
-                
-            elif action == "Update":
-                event = get_object_or_404(Event, id=event_id)
-                event_temp = copy.deepcopy(event)
+        elif action == "Update":
+            event = get_object_or_404(Event, id=event_id)
+            event_temp = copy.deepcopy(event)
 
-                calendar_event = get_object_or_404(CalendarEvent, eventid=event_id)
-                #print(f"Event: {event}, Event ID: {event_id}, Action: {action}, event_type: {event_type}, Start Date: {start_date}, End Date: {end_date}")                
-                event.start = start_date
-                event.end = end_date
-                event.itemid = get_object_or_404(Item, naam=item_naam)
-                # Check eventtype object of object ook echt bestaat met de gegeven event_type
-                event.eventType = get_object_or_404(EventType, type=event_type)
+            calendar_event = get_object_or_404(CalendarEvent, eventid=event_id)
+            #print(f"Event: {event}, Event ID: {event_id}, Action: {action}, event_type: {event_type}, Start Date: {start_date}, End Date: {end_date}")                
+            event.start = start_date
+            event.end = end_date
+            event.itemid = get_object_or_404(Item, naam=item_naam)
+            # Check eventtype object of object ook echt bestaat met de gegeven event_type
+            event.eventType = get_object_or_404(EventType, type=event_type)
 
-                # Default checked Django models.Model implementatie dus de ids van de object, 
-                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
-                if (event.__str__ == event_temp.__str__):
-                    print("1", event, "and", event_temp)
-                    messages.warning(request, "No changes detected from the updated event") 
-                else:
-                    #print("2", event, event_temp)
-                    checked = check_overlap(event)
-                    if checked['overlap_flag']==False:
-                        event.save()
-                        
-                        calendar_event.calendarid = get_object_or_404(Calendar, userid=userid)
-                        calendar_event.save()
-
-                        messages.success(request, 'Event updated successfully.')
-                    else:
-                        messages.error(request, checked['warning'])
-
-            elif action == 'Delete':
-                # Delete the event
-                event = get_object_or_404(Event, id=event_id)
-                event.delete()
-
-                messages.success(request, 'Event deleted successfully.')
-
-            elif action == 'Create':
-                eventType = get_object_or_404(EventType, type=event_type)
-                itemid = get_object_or_404(Item, naam=item_naam)
-                new_event = Event(eventType=eventType, itemid=itemid, start=start_date, end=end_date)
-                #print(new_event)
-
-
-                #print(start, end)
-                #een item kan meer aan een persoon uitgeleend worden, check of item vrij is voor deze periode
-                checked = check_overlap(new_event)
+            # Default checked Django models.Model implementatie dus de ids van de object, 
+            # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
+            if (event.__str__ == event_temp.__str__):
+                print("1", event, "and", event_temp)
+                messages.warning(request, "No changes detected from the updated event") 
+            else:
+                #print("2", event, event_temp)
+                checked = check_overlap(event)
                 if checked['overlap_flag']==False:
-                    new_event.save()
-                    calendarid = get_object_or_404(Calendar, userid=userid)
-                    new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
-                    new_calender_event.save()
-                    messages.success(request, f"Event Successfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
-                    #update calendar_events met nieuw object om mee te geven aan render
-                    calendar_events = CalendarEvent.objects.all()
-                    #print(new_calender_event)
+                    event.save()
+                    
+                    calendar_event.calendarid = get_object_or_404(Calendar, userid=userid)
+                    calendar_event.save()
+
+                    messages.success(request, 'Event updated successfully.')
                 else:
                     messages.error(request, checked['warning'])
-                return render(request, 'app/event-manager.html', {
-                    'calendar_events': calendar_events,
-                    'event_types': event_types,
-                    'items': items,
-                    'users': users,
-                    "event_id": event_id, 
-                    "calendar_event_id": calendar_event_id, 
-                    "event_type": event_type, 
-                    "item_naam": item_naam, 
-                    "user_username": user_username, 
-                    "start_date": start_date, 
-                    "end_date": end_date
-                    })
 
-        #Geef data door aan event manager view
-        return render(request, 'app/event-manager.html', {
-            'calendar_events': calendar_events,
-            'event_types': event_types,
-            'items': items,
-            'users': users
-            })
-    else:
-        return render(request, 'app/event-manager.html')
+        elif action == 'Delete':
+            # Delete the event
+            event = get_object_or_404(Event, id=event_id)
+            event.delete()
+
+            messages.success(request, 'Event deleted successfully.')
+
+        elif action == 'Create':
+            eventType = get_object_or_404(EventType, type=event_type)
+            itemid = get_object_or_404(Item, naam=item_naam)
+            new_event = Event(eventType=eventType, itemid=itemid, start=start_date, end=end_date)
+            #print(new_event)
+
+
+            #print(start, end)
+            #een item kan meer aan een persoon uitgeleend worden, check of item vrij is voor deze periode
+            checked = check_overlap(new_event)
+            if checked['overlap_flag']==False:
+                new_event.save()
+                calendarid = get_object_or_404(Calendar, userid=userid)
+                new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
+                new_calender_event.save()
+                messages.success(request, f"Event Successfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
+                #update calendar_events met nieuw object om mee te geven aan render
+                calendar_events = CalendarEvent.objects.all()
+                #print(new_calender_event)
+            else:
+                messages.error(request, checked['warning'])
+            return render(request, 'app/event-manager.html', {
+                'calendar_events': calendar_events,
+                'event_types': event_types,
+                'items': items,
+                'users': users,
+                "event_id": event_id, 
+                "calendar_event_id": calendar_event_id, 
+                "event_type": event_type, 
+                "item_naam": item_naam, 
+                "user_username": user_username, 
+                "start_date": start_date, 
+                "end_date": end_date
+                })
+
+    #Geef data door aan event manager view
+    return render(request, 'app/event-manager.html', {
+        'calendar_events': calendar_events,
+        'event_types': event_types,
+        'items': items,
+        'users': users
+        })
+    
 
 def user_manager(request):
     #check of user is ingelogd
-    if request.user.is_authenticated:
-        #alle objecten van model van models.py
-        users = User.objects.all()
+    if not request.user.is_authenticated:
+        return render(request, 'app/user-manager.html')
+    #alle objecten van model van models.py
+    users = User.objects.all()
 
-        #print(calendar_events)
-        # event CRUD handling
-        if request.method == "POST":
-            action = request.POST.get('action')
-            
-            #todo: check eerst of data niet leeg is en geldig is met database opties
-            user_id = request.POST.get('user_id')
-            user_username = request.POST.get('user_username')
-            user_first_name = request.POST.get('user_first_name')
-            user_last_name = request.POST.get('user_last_name')
-            user_password = request.POST.get('user_password')
-            user_staffmember_status = request.POST.get('user_staffmember_status')
-            old_user_staff_status = request.POST.get('old_user_staff_status')
-            user_password_check = request.POST.get('user_password_check')
-            user_email = user_username
+    #print(calendar_events)
+    # event CRUD handling
+    if request.method == "POST":
+        action = request.POST.get('action')
+        
+        
+        #todo: check eerst of data niet leeg is en geldig is met database opties
+        user_id = request.POST.get('user_id')
+        user_username = request.POST.get('user_username')
+        user_first_name = request.POST.get('user_first_name')
+        user_last_name = request.POST.get('user_last_name')
+        user_password = request.POST.get('user_password')
+        user_staffmember_status = request.POST.get('user_staffmember_status')
+        old_user_staff_status = request.POST.get('old_user_staff_status')
+        user_password_check = request.POST.get('user_password_check')
+        user_email = user_username
 
 
-            if action == "Update":
-                user = get_object_or_404(User, id=user_id)
-                user_temp = copy.deepcopy(user)
+        if action == "Update":
+            user = get_object_or_404(User, id=user_id)
+            user_temp = copy.deepcopy(user)
 
-                try:
-                    validate_email(user_username)
-                    #Validate_email van validators gooit een error, geen boolean, dus error handling moet gebeuren
-                except ValidationError:
-                    messages.warning(request, 'Invalid email address.')
-                    return render(request, 'app/user-manager.html', {
-                        'user_username': user_username,
-                        'user_first_name': user_first_name,
-                        'user_last_name': user_last_name,
-                        'user_email' : user_email,
-                        'users': users
-                    })
-                user.username = user_username
-                user.first_name = user_first_name
-                user.last_name = user_last_name
-                user.email = user_email
+            try:
+                validate_email(user_username)
+                #Validate_email van validators gooit een error, geen boolean, dus error handling moet gebeuren
+            except ValidationError:
+                messages.warning(request, 'Invalid email address.')
+                return render(request, 'app/user-manager.html', {
+                    'user_username': user_username,
+                    'user_first_name': user_first_name,
+                    'user_last_name': user_last_name,
+                    'user_email' : user_email,
+                    'users': users
+                })
+            user.username = user_username
+            user.first_name = user_first_name
+            user.last_name = user_last_name
+            user.email = user_email
 
-                # Verifieer eerst of het eigen account is en zijn eigen staffmember status aanpast, geef warning en return render()
-                if user_id == str(request.user.id):
-                    if user_staffmember_status != None or str(user.is_staff) != old_user_staff_status:
-                        if str(user.is_staff) != user_staffmember_status: 
+            # Verifieer eerst of het eigen account is en zijn eigen staffmember status aanpast, geef warning en return render()
+            if user_id == str(request.user.id):
+                if user_staffmember_status != None or str(user.is_staff) != old_user_staff_status:
+                    if str(user.is_staff) != user_staffmember_status: 
 
-                            messages.warning(request, 'Changing own userstaff status is prohibited.')
-                            return render(request, 'app/user-manager.html', {
-                                'user_username': user_username,
-                                'user_first_name': user_first_name,
-                                'user_last_name': user_last_name,
-                                'user_email' : user_email,
-                                'users': users
-                            })
-                        pass
+                        messages.warning(request, 'Changing own userstaff status is prohibited.')
+                        return render(request, 'app/user-manager.html', {
+                            'user_username': user_username,
+                            'user_first_name': user_first_name,
+                            'user_last_name': user_last_name,
+                            'user_email' : user_email,
+                            'users': users
+                        })
+                    pass
+            else:
+                if user_staffmember_status == "on":
+                    user.is_staff = True
                 else:
-                    if user_staffmember_status == "on":
-                        user.is_staff = True
-                    else:
-                        user.is_staff = False
-                if user_password == user_password_check:
-                    user.set_password(user_password)
-                else:
-                    messages.warning(request, "Updated passwords don't match.")
-                    return render(request, 'app/user-manager.html', {
-                        'user_username': user_username,
-                        'user_first_name': user_first_name,
-                        'user_last_name': user_last_name,
-                        'user_email' : user_email,
-                        'users': users
-                    })
+                    user.is_staff = False
+            if user_password == user_password_check:
+                user.set_password(user_password)
+            else:
+                messages.warning(request, "Updated passwords don't match.")
+                return render(request, 'app/user-manager.html', {
+                    'user_username': user_username,
+                    'user_first_name': user_first_name,
+                    'user_last_name': user_last_name,
+                    'user_email' : user_email,
+                    'users': users
+                })
 
-                # Default checked Django models.Model implementatie dus de ids van de object, 
-                # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
-                #print(user_temp == user)
-                if (user_temp == user 
-                    and user_staffmember_status == old_user_staff_status
-                    and user_first_name == user.first_name
-                    and user_last_name == user.last_name
-                    and user_password == user.password
-                    ):
-                    #print("1", user, "and", user_temp)
-                    messages.warning(request, "No changes detected from the updated user") 
-                else:
-                    #print("2", event, event_temp)
-                    user.save()
+            # Default checked Django models.Model implementatie dus de ids van de object, 
+            # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
+            #print(user_temp == user)
+            if (user_temp == user 
+                and user_staffmember_status == old_user_staff_status
+                and user_first_name == user.first_name
+                and user_last_name == user.last_name
+                and user_password == user.password
+                ):
+                #print("1", user, "and", user_temp)
+                messages.warning(request, "No changes detected from the updated user") 
+            else:
+                #print("2", event, event_temp)
+                user.save()
+                
+                messages.success(request, 'User updated successfully.')
+
+        elif action == 'Delete':
+            # Verifieer eerst of er geen selfsabotage is
+            if (user_id == str(request.user.id)):
+                messages.warning(request, "Can't delete your own account.")
+                return render(request, 'app/user-manager.html', {
+                    'user_username': user_username,
+                    'user_first_name': user_first_name,
+                    'user_last_name': user_last_name,
+                    'user_email' : user_email,
+                    'users': users,
+                })
+            # Delete the user
+            #user.delete()
+
+            print(request.user.id, user_id)
+            messages.success(request, 'User deleted successfully.')
+
+        elif action == 'Create':
+            if not all([user_first_name, user_last_name, user_email, user_password, user_password_check]):
+                messages.warning(request, 'Error missing fields.')
+                return render(request, 'app/user-manager.html', {
+                    'user_username': user_username,
+                    'user_first_name': user_first_name,
+                    'user_last_name': user_last_name,
+                    'user_email' : user_email,
+                    'users': users,
+                })
                     
-                    messages.success(request, 'User updated successfully.')
-
-            elif action == 'Delete':
-                # Verifieer eerst of er geen selfsabotage is
-                if (user_id == str(request.user.id)):
-                    messages.warning(request, "Can't delete your own account.")
-                    return render(request, 'app/user-manager.html', {
-                        'user_username': user_username,
-                        'user_first_name': user_first_name,
-                        'user_last_name': user_last_name,
-                        'user_email' : user_email,
-                        'users': users,
-                    })
-                # Delete the user
-                #user.delete()
-
-                print(request.user.id, user_id)
-                messages.success(request, 'User deleted successfully.')
-
-            elif action == 'Create':
-                if not all([user_first_name, user_last_name, user_email, user_password, user_password_check]):
-                    messages.warning(request, 'Error missing fields.')
-                    return render(request, 'app/user-manager.html', {
-                        'user_username': user_username,
-                        'user_first_name': user_first_name,
-                        'user_last_name': user_last_name,
-                        'user_email' : user_email,
-                        'users': users,
-                    })
-                        
-                #Email validatie met Django email validator
-                try:
-                    validate_email(user_email)
-                    #Validate_email van validators gooit een error, geen boolean, dus error handling moet gebeuren
-                except ValidationError:
-                    messages.warning(request, 'Invalid email address.')
-                    return render(request, 'app/user-manager.html', {
-                        'user_username': user_username,
-                        'user_first_name': user_first_name,
-                        'user_last_name': user_last_name,
-                        'user_email' : user_email,
-                        'users': users,
-                    })
-
-                #Check paswoord ook hetzelfde is
-                if user_password == user_password_check:
-                    User.objects.create_user(username=user_username, email=user_email, password=user_password, first_name=user_first_name, last_name=user_last_name)
-                    user = get_object_or_404(User, username=user_username)
-
-                    calendar = Calendar(userid=user, description=user.username)
-                    calendar.save()
-                    messages.success(request, "Successfully added user")
-                else:
-                    messages.warning(request, "Password doesn't match.")
-                    return render(request, 'app/user-manager.html', {
-                        'user_username': user_username,
-                        'user_first_name': user_first_name,
-                        'user_last_name': user_last_name,
-                        'user_email' : user_email,
-                        'users': users,
-                    })
-
-                #update users met nieuw object om mee te geven aan render
-                users = CalendarEvent.objects.all()
-                #print(new_calender_event)
+            #Email validatie met Django email validator
+            try:
+                validate_email(user_email)
+                #Validate_email van validators gooit een error, geen boolean, dus error handling moet gebeuren
+            except ValidationError:
+                messages.warning(request, 'Invalid email address.')
                 return render(request, 'app/user-manager.html', {
                     'user_username': user_username,
                     'user_first_name': user_first_name,
@@ -366,12 +342,40 @@ def user_manager(request):
                     'users': users,
                 })
 
-        #Geef data door aan event manager view
-        return render(request, 'app/user-manager.html', {
-            'users': users
+            #Check paswoord ook hetzelfde is
+            if user_password == user_password_check:
+                User.objects.create_user(username=user_username, email=user_email, password=user_password, first_name=user_first_name, last_name=user_last_name)
+                user = get_object_or_404(User, username=user_username)
+
+                calendar = Calendar(userid=user, description=user.username)
+                calendar.save()
+                messages.success(request, "Successfully added user")
+            else:
+                messages.warning(request, "Password doesn't match.")
+                return render(request, 'app/user-manager.html', {
+                    'user_username': user_username,
+                    'user_first_name': user_first_name,
+                    'user_last_name': user_last_name,
+                    'user_email' : user_email,
+                    'users': users,
+                })
+
+            #update users met nieuw object om mee te geven aan render
+            users = CalendarEvent.objects.all()
+            #print(new_calender_event)
+            return render(request, 'app/user-manager.html', {
+                'user_username': user_username,
+                'user_first_name': user_first_name,
+                'user_last_name': user_last_name,
+                'user_email' : user_email,
+                'users': users,
             })
-    else:
-        return render(request, 'app/user-manager.html')
+
+    #Geef data door aan event manager view
+    return render(request, 'app/user-manager.html', {
+        'users': users
+        })
+
 
 def item_manager(request):
     #check of user is ingelogd
