@@ -10,7 +10,7 @@
                 <a class="bg-slate-600 px-4 py-2 sm:py-4 rounded-2xl text-center text-slate-400 font-medium" href="logout_view">logout</a>
             </div>
             <div class="grid gap-4 sm:gap-x-8 bg-gray-200 rounded-2xl p-4 sm:p-8 mb-8 grid-cols-1 sm:grid-cols-[3fr_1fr]  grid-rows-[auto_1fr]">
-                <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">Welcome {% if request.user.is_staff %}Staffmember:  {% else %}Student: {% endif%} {{request.user.first_name}} {{request.user.last_name}}</h1>
+                <h1 class="sm:col-span-2 font-bold text-2xl text-slate-500">Welcome {% if request.user.is_staff %}Admin:  {% else %}Student: {% endif%} {{request.user.first_name}} {{request.user.last_name}}</h1>
                 <div class="flex bg-slate-400 rounded-xl flex-col px-8 py-4 gap-2">
                     <div class="flex place-content-between place-items-center min-h-11">
                         <h2 class="text-xl text-slate-100 font-medium">
