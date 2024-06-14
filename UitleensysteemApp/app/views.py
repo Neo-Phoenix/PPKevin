@@ -266,8 +266,17 @@ def user_manager(request):
                         user.is_staff = True
                     else:
                         user.is_staff = False
-                    if user_password:
-                        user.set_password(user_password)
+                if user_password == user_password_check:
+                    user.set_password(user_password)
+                else:
+                    messages.warning(request, "Updated passwords don't match.")
+                    return render(request, 'app/user-manager.html', {
+                        'user_username': user_username,
+                        'user_first_name': user_first_name,
+                        'user_last_name': user_last_name,
+                        'user_email' : user_email,
+                        'users': users
+                    })
 
                 # Default checked Django models.Model implementatie dus de ids van de object, 
                 # maar ik vergelijk de __str__ method van de class die dus een stringrepresentatie bevat van de inhoud 
