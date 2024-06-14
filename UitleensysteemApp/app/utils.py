@@ -108,7 +108,7 @@ def check_overlap(new_event:Event):
     warning = ""
     overlap_flag = False
     for calendar_event in calendar_events:
-        #check eerst of item hetzelfde is van calendar_event1 instance
+        #check eerst of item hetzelfde is van calendar_event instance
         if new_event.itemid == calendar_event.eventid.itemid:
             #skip eigen instance met zichzelf te checken voor overlap
             if new_event.id == calendar_event.eventid.id:
