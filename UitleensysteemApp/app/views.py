@@ -166,7 +166,7 @@ def event_manager(request):
                     calendarid = get_object_or_404(Calendar, userid=userid)
                     new_calender_event = CalendarEvent(calendarid=calendarid, eventid=new_event)
                     new_calender_event.save()
-                    messages.success(request, f"Event succesfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
+                    messages.success(request, f"Event Successfully added from {checked['start_new_event'].date()} till {checked['start_new_event'].date()}")
                     #update calendar_events met nieuw object om mee te geven aan render
                     calendar_events = CalendarEvent.objects.all()
                     #print(new_calender_event)
@@ -293,7 +293,7 @@ def user_manager(request):
 
                     calendar = Calendar(userid=user, description=user.username)
                     calendar.save()
-                    messages.success(request, "Succesfully added user")
+                    messages.success(request, "Successfully added user")
                 else:
                     messages.warning(request, "Password doesn't match.")
                     return render(request, 'app/user-manager.html', {
@@ -387,7 +387,7 @@ def item_manager(request):
                 if not Item.objects.filter(naam=enforced_item_name).exists():
                     new_item = Item(naam=enforced_item_name, beschrijving=item_beschrijving, itemTypeID=item_itemTypeID)
                     new_item.save()
-                    messages.success(request, "Succesfully added item")
+                    messages.success(request, "Successfully added item")
                 else:
                     messages.error(request, f"Item already exists when parsing your item name in our enforced format, resulting in: \"{enforced_item_name}\"")
 
@@ -450,7 +450,7 @@ def register(request):
         user = get_object_or_404(User, username=email)
         calendar = Calendar(userid=user, description=user.username)
         calendar.save()
-        messages.success(request, "Succesfully registered, please login.")
+        messages.success(request, "Successfully registered, please login.")
         return render(request, 'app/signin.html', {'firstname': firstname, 'lastname': lastname, 'email': email})
     else:
         messages.warning(request, "Password doesn't match.")

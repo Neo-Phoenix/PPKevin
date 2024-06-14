@@ -107,16 +107,16 @@ def check_overlap(new_event:Event):
 
     warning = ""
     overlap_flag = False
-    for calendar_event1 in calendar_events:
-        #check eerst of item hetzelfde is van calendar_event1 instance
-        if new_event.itemid == calendar_event1.eventid.itemid:
+    for calendar_event in calendar_events:
+        #check eerst of item hetzelfde is van calendar_event instance
+        if new_event.itemid == calendar_event.eventid.itemid:
             #skip eigen instance met zichzelf te checken voor overlap
-            if new_event.id == calendar_event1.eventid.id:
-                print(new_event.id, calendar_event1.eventid.id)
+            if new_event.id == calendar_event.eventid.id:
+                print(new_event.id, calendar_event.eventid.id)
                 continue
 
-            start_old_event = datetime.strptime(str(calendar_event1.eventid.start), "%Y-%m-%d")
-            end_old_event = datetime.strptime(str(calendar_event1.eventid.end), "%Y-%m-%d")
+            start_old_event = datetime.strptime(str(calendar_event.eventid.start), "%Y-%m-%d")
+            end_old_event = datetime.strptime(str(calendar_event.eventid.end), "%Y-%m-%d")
 
             #print(start_new_event.day, end_new_event.day, "and", start_old_event.day, end_old_event.day)
             #check first if next event isnt the same object compared to itself
